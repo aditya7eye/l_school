@@ -18,9 +18,8 @@ Route::get('/insertadmin','Master_Controller@insertadmin');
 Route::get('/del_admin','Master_Controller@del_admin');
 Route::get('/update_admin_form','Master_Controller@update_admin_form');
 Route::get('/updateadmindetails','Master_Controller@updateadmindetails');
-
-
-
-/////////////////////////////planmaster/////////////////////////////////////////////
-
 Route::get('/manage-plan','Plan_Controller@addplan');
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+Route::get('/employee-manage','Employee_Controller@employeemanage');
