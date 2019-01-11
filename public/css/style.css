@@ -19845,7 +19845,7 @@ pre {
 
 .fade.show,
 .fade.in {
-    opacity: 1;
+    /*opacity: 1;*/
 }
 
 

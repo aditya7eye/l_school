@@ -12,10 +12,10 @@ class Payroll extends CI_Controller
         $this->load->model('User_model');
         $this->load->library('form_validation');
     }
-    
+
     public function index()
     {
-       $data['content'] = 'payroll/payroll_list';
+        $data['content'] = 'payroll/payroll_list';
         $this->load->view('common/master', $data);
     }
 
@@ -28,7 +28,7 @@ class Payroll extends CI_Controller
             $no++;
             $row = array();
             $row[] = $no;
-            $row[] = anchor(site_url('payroll/payslip/'.$payroll->payroll_id),$this->User_model->get_by_id($payroll->user_id)->name,'target="_blank"');
+            $row[] = anchor(site_url('payroll/payslip/' . $payroll->payroll_id), $this->User_model->get_by_id($payroll->user_id)->name, 'target="_blank"');
             $attendance_arr = json_decode($payroll->attendance);
             foreach ($attendance_arr as $value) {
                 if ($value->type == 'Month Days' || $value->type == 'Total Paid Days') {
@@ -38,20 +38,20 @@ class Payroll extends CI_Controller
             $fixed_arr = json_decode($payroll->salarypart);
             foreach ($fixed_arr as $fixed_row) {
                 if ($fixed_row->type == 'FIXED BASIC' || $fixed_row->type == 'FIXED DEARNESS ALLOWANCE' || $fixed_row->type == 'FIXED HOUSE RENT ALLOWANCE' || $fixed_row->type == 'FIXED CONVEYANCE' || $fixed_row->type == 'FIXED SPECIAL ALLOWANCE' || $fixed_row->type == 'FIXED MEDICAL ALLOWANCE' || $fixed_row->type == 'FIXED OTHER ALLOWANCE') {
-                   $row[] = $fixed_row->amount;
+                    $row[] = $fixed_row->amount;
                 }
             }
             $salary_earned_arr = json_decode($payroll->salary_earned);
             foreach ($salary_earned_arr as $salary_earned_row) {
                 if ($salary_earned_row->type == 'EARNED BASIC' || $salary_earned_row->type == 'EARNED DEARNESS ALLOWANCE' || $salary_earned_row->type == 'EARNED HOUSE RENT ALLOWANCE' || $salary_earned_row->type == 'EARNED CONVEYANCE' || $salary_earned_row->type == 'EARNED SPECIAL ALLOWANCE' || $salary_earned_row->type == 'EARNED MEDICAL ALLOWANCE' || $salary_earned_row->type == 'EARNED OTHER ALLOWANCE') {
-                   $row[] = $salary_earned_row->amount;
+                    $row[] = $salary_earned_row->amount;
                 }
             }
             $row[] = $payroll->grosssal;
             $salary_deduction_arr = json_decode($payroll->deductions);
             foreach ($salary_deduction_arr as $salary_deduction_row) {
                 if ($salary_deduction_row->type == 'EMPLOYEE ESI' || $salary_deduction_row->type == 'PROVIDENT FUND' || $salary_deduction_row->type == 'LABOUR WELFARE FUND' || $salary_deduction_row->type == 'PROFESSIONAL TAX') {
-                   $row[] = $salary_deduction_row->amount;
+                    $row[] = $salary_deduction_row->amount;
                 }
             }
             $row[] = $payroll->total_allowance;
@@ -61,9 +61,9 @@ class Payroll extends CI_Controller
             $row[] = $payroll->payout;
             $eployer_salarypart_arr = json_decode($payroll->eployer_salarypart);
             foreach ($eployer_salarypart_arr as $eployer_salarypart_row) {
-                if ($eployer_salarypart_row->type == 'EMPLOYER ESI' ||  $eployer_salarypart_row->type == 'EMPLOYER PROVIDENT FUND' || $eployer_salarypart_row->type == 'EMPLOYER LABOUR WELFARE FUND' || $eployer_salarypart_row->type == 'INSURANCE') {
+                if ($eployer_salarypart_row->type == 'EMPLOYER ESI' || $eployer_salarypart_row->type == 'EMPLOYER PROVIDENT FUND' || $eployer_salarypart_row->type == 'EMPLOYER LABOUR WELFARE FUND' || $eployer_salarypart_row->type == 'INSURANCE') {
 
-                   $row[] = $eployer_salarypart_row->amount;
+                    $row[] = $eployer_salarypart_row->amount;
                 }
             }
             $row[] = $payroll->ctc;
@@ -72,31 +72,35 @@ class Payroll extends CI_Controller
             $data[] = $row;
         }
         $output = array(
-                        "draw" => $_POST['draw'],
-                        "recordsTotal" => $this->Payroll_model->count_all(),
-                        "recordsFiltered" => $this->Payroll_model->count_filtered(),
-                        "data" => $data,
-                );
+            "draw" => $_POST['draw'],
+            "recordsTotal" => $this->Payroll_model->count_all(),
+            "recordsFiltered" => $this->Payroll_model->count_filtered(),
+            "data" => $data,
+        );
         //output to json format
         echo json_encode($output);
     }
-    public function payslip($id) {
-        
+
+    public function payslip($id)
+    {
+
         $data['param2'] = $id;
         $data['content'] = 'payroll/payroll_details_new';
         $this->load->view('common/master', $data);
-        
+
     }
-    
-    public function payslip2($id) {
-        
+
+    public function payslip2($id)
+    {
+
         $data['param2'] = $id;
 //        $data['content'] = 'test_1';
         $this->load->view('test_1', $data);
-        
+
     }
-    
-    function payroll_report_view() {
+
+    function payroll_report_view()
+    {
         $client_id = $this->input->post('client');
         $year = $this->input->post('year');
         $month = $this->input->post('month');
@@ -140,22 +144,21 @@ class Payroll extends CI_Controller
                 if ($row['designation_id'] != 0)
                     $designation = $this->db->get_where('designation', array('designation_id' => $row['designation_id']))->row()->name;
                 $row_value[] = $designation;
-               // ******************************************************************
+                // ******************************************************************
                 $attendance_arr = json_decode($payroll['attendance']);
                 foreach ($attendance_arr as $value) {
-                    if($value->type=='Month Days' ||$value->type=='Total Paid Days'){
-                     $row_value[] = $value->amount;   
+                    if ($value->type == 'Month Days' || $value->type == 'Total Paid Days') {
+                        $row_value[] = $value->amount;
                     }
                 }
-              //  ******************************************************************
+                //  ******************************************************************
                 $row_value[] = $row['joining_salary'];
 
                 $fixed_arr = json_decode($payroll['salarypart']);
-                foreach ($fixed_arr as $fixed_row)
-                {
-                  if($fixed_row->type=='FIXED BASIC' || $fixed_row->type=='FIXED DEARNESS ALLOWANCE' ||$fixed_row->type=='FIXED HOUSE RENT ALLOWANCE' || $fixed_row->type=='FIXED CONVEYANCE' || $fixed_row->type=='FIXED SPECIAL ALLOWANCE' || $fixed_row->type=='FIXED MEDICAL ALLOWANCE' || $fixed_row->type== 'FIXED OTHER ALLOWANCE'){   
-                    $row_value[] = $fixed_row->amount;
-                  }
+                foreach ($fixed_arr as $fixed_row) {
+                    if ($fixed_row->type == 'FIXED BASIC' || $fixed_row->type == 'FIXED DEARNESS ALLOWANCE' || $fixed_row->type == 'FIXED HOUSE RENT ALLOWANCE' || $fixed_row->type == 'FIXED CONVEYANCE' || $fixed_row->type == 'FIXED SPECIAL ALLOWANCE' || $fixed_row->type == 'FIXED MEDICAL ALLOWANCE' || $fixed_row->type == 'FIXED OTHER ALLOWANCE') {
+                        $row_value[] = $fixed_row->amount;
+                    }
                 }
                 $row_value[] = $bank['account_holder_name'];
                 $row_value[] = $bank['name'];
@@ -163,25 +166,25 @@ class Payroll extends CI_Controller
                 $row_value[] = $bank['ifsc_code'];
                 $row_value[] = $payroll['grosssal'];
                 $salary_earned_arr = json_decode($payroll['salary_earned']);
-                foreach ($salary_earned_arr as $salary_earned_row){
-                    if($salary_earned_row->type=='EARNED BASIC' || $salary_earned_row->type=='EARNED DEARNESS ALLOWANCE' ||$salary_earned_row->type=='EARNED HOUSE RENT ALLOWANCE' || $salary_earned_row->type=='EARNED CONVEYANCE' || $salary_earned_row->type=='EARNED SPECIAL ALLOWANCE' || $salary_earned_row->type=='EARNED MEDICAL ALLOWANCE' || $salary_earned_row->type== 'EARNED OTHER ALLOWANCE'){   
-                    $row_value[] = $salary_earned_row->amount;
-                  }
+                foreach ($salary_earned_arr as $salary_earned_row) {
+                    if ($salary_earned_row->type == 'EARNED BASIC' || $salary_earned_row->type == 'EARNED DEARNESS ALLOWANCE' || $salary_earned_row->type == 'EARNED HOUSE RENT ALLOWANCE' || $salary_earned_row->type == 'EARNED CONVEYANCE' || $salary_earned_row->type == 'EARNED SPECIAL ALLOWANCE' || $salary_earned_row->type == 'EARNED MEDICAL ALLOWANCE' || $salary_earned_row->type == 'EARNED OTHER ALLOWANCE') {
+                        $row_value[] = $salary_earned_row->amount;
+                    }
                 }
                 $salary_deduction_arr = json_decode($payroll['deductions']);
-                 foreach ($salary_deduction_arr as $salary_deduction_row){
-                    if($salary_deduction_row->type=='EMPLOYEE ESI' || $salary_deduction_row->type=='PROVIDENT FUND' ||$salary_deduction_row->type=='LABOUR WELFARE FUND' || $salary_deduction_row->type=='PROFESSIONAL TAX' || $salary_deduction_row->type=='OTHER DEDUCTION INCOME TAX' || $salary_deduction_row->type=='SALARY ADVANCE DEDUCTION' || $salary_deduction_row->type== 'INSURANCE DEDUCTION' || $salary_deduction_row->type=='TAX DEDUCTION'){   
-                    $row_value[] = $salary_deduction_row->amount;
-                 }
-                 
+                foreach ($salary_deduction_arr as $salary_deduction_row) {
+                    if ($salary_deduction_row->type == 'EMPLOYEE ESI' || $salary_deduction_row->type == 'PROVIDENT FUND' || $salary_deduction_row->type == 'LABOUR WELFARE FUND' || $salary_deduction_row->type == 'PROFESSIONAL TAX' || $salary_deduction_row->type == 'OTHER DEDUCTION INCOME TAX' || $salary_deduction_row->type == 'SALARY ADVANCE DEDUCTION' || $salary_deduction_row->type == 'INSURANCE DEDUCTION' || $salary_deduction_row->type == 'TAX DEDUCTION') {
+                        $row_value[] = $salary_deduction_row->amount;
+                    }
+
                 }
-                
+
                 $eployer_salarypart_arr = json_decode($payroll['eployer_salarypart']);
-               foreach ($eployer_salarypart_arr as $eployer_salarypart_row){
-                if($eployer_salarypart_row->type=='EMPLOYER ESI' || $eployer_salarypart_row->type=='EPS WAGES' ||$eployer_salarypart_row->type=='EMPLOYER PROVIDENT FUND' || $eployer_salarypart_row->type=='EMPLOYER LABOUR WELFARE FUND' || $eployer_salarypart_row->type=='INSURANCE'){   
-                
-                $row_value[] = $eployer_salarypart_row->amount;
-                }
+                foreach ($eployer_salarypart_arr as $eployer_salarypart_row) {
+                    if ($eployer_salarypart_row->type == 'EMPLOYER ESI' || $eployer_salarypart_row->type == 'EPS WAGES' || $eployer_salarypart_row->type == 'EMPLOYER PROVIDENT FUND' || $eployer_salarypart_row->type == 'EMPLOYER LABOUR WELFARE FUND' || $eployer_salarypart_row->type == 'INSURANCE') {
+
+                        $row_value[] = $eployer_salarypart_row->amount;
+                    }
                 }
                 $row_value[] = $payroll['grosssal'];
                 $row_value[] = $payroll['total_allowance'];
@@ -193,241 +196,241 @@ class Payroll extends CI_Controller
                 $form_array[] = $row_value;
                 $row_value = array();
             }
-            
-            
+
+
             $i++;
         }
 
         if (!empty($form_array)) {
-        $countarray = count($form_array) + 1;
+            $countarray = count($form_array) + 1;
 
-        require_once APPPATH . 'third_party/PHPExcel/Bootstrap.php';
-        // require_once base_url().'application/third_party/PHPExcel/Bootstrap.php';
-        // Create new Spreadsheet object
-                $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        // Set document properties
-                $spreadsheet->getProperties()->setCreator('Webeasystep.com ')
+            require_once APPPATH . 'third_party/PHPExcel/Bootstrap.php';
+            // require_once base_url().'application/third_party/PHPExcel/Bootstrap.php';
+            // Create new Spreadsheet object
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            // Set document properties
+            $spreadsheet->getProperties()->setCreator('Webeasystep.com ')
                 ->setLastModifiedBy('Rahul lodhi')
                 ->setTitle('Phpecxel codeigniter tutorial')
                 ->setSubject('integrate codeigniter with PhpExcel')
                 ->setDescription('this is the file test');
 
-        // add style to the header
-                $styleArray = array(
-      'borders' => array(
-          'vertical' => array(
-              'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-          ),
-      ),
-  );
+            // add style to the header
+            $styleArray = array(
+                'borders' => array(
+                    'vertical' => array(
+                        'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    ),
+                ),
+            );
 
-        $styleArray1 = array(
-            'font' => array(
-                'bold' => true,
-                'type' => 'text',
-            ),
-            'alignment' => array(
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-            ),
-            'borders' => array(
-                'top' => array(
-                    'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+            $styleArray1 = array(
+                'font' => array(
+                    'bold' => true,
+                    'type' => 'text',
                 ),
-            ),
-            'fill' => array(
-                'type' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
-                'rotation' => 90,
-                'startcolor' => array(
-                    'argb' => 'FFA0A0A0',
+                'alignment' => array(
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 ),
-                'endcolor' => array(
-                    'argb' => 'FFFFFFFF',
+                'borders' => array(
+                    'top' => array(
+                        'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    ),
                 ),
-            ),
-        );
+                'fill' => array(
+                    'type' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
+                    'rotation' => 90,
+                    'startcolor' => array(
+                        'argb' => 'FFA0A0A0',
+                    ),
+                    'endcolor' => array(
+                        'argb' => 'FFFFFFFF',
+                    ),
+                ),
+            );
 
-        $styleArray2 = array(
-            'font' => array(
-                'bold' => true,
-                'type' => 'text',
-            ),
-            'alignment' => array(
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-            ),
-            'borders' => array(
-                'top' => array(
-                    'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+            $styleArray2 = array(
+                'font' => array(
+                    'bold' => true,
+                    'type' => 'text',
                 ),
-            ),
-            'fill' => array(
-                'type' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
-                'rotation' => 90,
-                'startcolor' => array(
-                    'argb' => '419641',
+                'alignment' => array(
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 ),
-                'endcolor' => array(
-                    'argb' => '419641',
+                'borders' => array(
+                    'top' => array(
+                        'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    ),
                 ),
-            ),
-        );
+                'fill' => array(
+                    'type' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
+                    'rotation' => 90,
+                    'startcolor' => array(
+                        'argb' => '419641',
+                    ),
+                    'endcolor' => array(
+                        'argb' => '419641',
+                    ),
+                ),
+            );
 
-        $styleArray3 = array(
-            'font' => array(
-                'bold' => true,
-            ),
-            'alignment' => array(
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-            ),
-            'borders' => array(
-                'top' => array(
-                    'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+            $styleArray3 = array(
+                'font' => array(
+                    'bold' => true,
                 ),
-            ),
-            'fill' => array(
-                'type' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
-                'rotation' => 90,
-                'startcolor' => array(
-                    'argb' => 'eca1a6',
+                'alignment' => array(
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 ),
-                'endcolor' => array(
-                    'argb' => 'eca1a6',
+                'borders' => array(
+                    'top' => array(
+                        'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    ),
                 ),
-            ),
-        );
+                'fill' => array(
+                    'type' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
+                    'rotation' => 90,
+                    'startcolor' => array(
+                        'argb' => 'eca1a6',
+                    ),
+                    'endcolor' => array(
+                        'argb' => 'eca1a6',
+                    ),
+                ),
+            );
 
-        $styleArray4 = array(
-            'font' => array(
-                'bold' => true,
-            ),
-            'alignment' => array(
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-            ),
-            'borders' => array(
-                'top' => array(
-                    'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+            $styleArray4 = array(
+                'font' => array(
+                    'bold' => true,
                 ),
-            ),
-            'fill' => array(
-                'type' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
-                'rotation' => 90,
-                'startcolor' => array(
-                    'argb' => 'DEB887',
+                'alignment' => array(
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 ),
-                'endcolor' => array(
-                    'argb' => 'DEB887',
+                'borders' => array(
+                    'top' => array(
+                        'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    ),
                 ),
-            ),
-        );
+                'fill' => array(
+                    'type' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
+                    'rotation' => 90,
+                    'startcolor' => array(
+                        'argb' => 'DEB887',
+                    ),
+                    'endcolor' => array(
+                        'argb' => 'DEB887',
+                    ),
+                ),
+            );
 
-        $styleArray5 = array(
-            'font' => array(
-                'bold' => true,
-            ),
-            'alignment' => array(
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-            ),
-            'borders' => array(
-                'top' => array(
-                    'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+            $styleArray5 = array(
+                'font' => array(
+                    'bold' => true,
                 ),
-            ),
-            'fill' => array(
-                'type' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
-                'rotation' => 90,
-                'startcolor' => array(
-                    'argb' => '00FFFF',
+                'alignment' => array(
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 ),
-                'endcolor' => array(
-                    'argb' => '00FFFF',
+                'borders' => array(
+                    'top' => array(
+                        'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    ),
                 ),
-            ),
-        );
+                'fill' => array(
+                    'type' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
+                    'rotation' => 90,
+                    'startcolor' => array(
+                        'argb' => '00FFFF',
+                    ),
+                    'endcolor' => array(
+                        'argb' => '00FFFF',
+                    ),
+                ),
+            );
 
 
-        $styleArray6 = array(
-            'font' => array(
-                'bold' => true,
-            ),
-            'alignment' => array(
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-            ),
-            'borders' => array(
-                'top' => array(
-                    'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+            $styleArray6 = array(
+                'font' => array(
+                    'bold' => true,
                 ),
-            ),
-            'fill' => array(
-                'type' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
-                'rotation' => 90,
-                'startcolor' => array(
-                    'argb' => '8FBC8F',
+                'alignment' => array(
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 ),
-                'endcolor' => array(
-                    'argb' => '8FBC8F',
+                'borders' => array(
+                    'top' => array(
+                        'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    ),
                 ),
-            ),
-        );
+                'fill' => array(
+                    'type' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
+                    'rotation' => 90,
+                    'startcolor' => array(
+                        'argb' => '8FBC8F',
+                    ),
+                    'endcolor' => array(
+                        'argb' => '8FBC8F',
+                    ),
+                ),
+            );
 
-        $styleArray7 = array(
-            'font' => array(
-                'bold' => true,
-                'type' => 'text',
-            ),
-            'alignment' => array(
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-            ),
-            'borders' => array(
-                'top' => array(
-                    'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+            $styleArray7 = array(
+                'font' => array(
+                    'bold' => true,
+                    'type' => 'text',
                 ),
-            ),
-            'fill' => array(
-                'type' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
-                'rotation' => 90,
-                'startcolor' => array(
-                    'argb' => 'FFA07A',
+                'alignment' => array(
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 ),
-                'endcolor' => array(
-                    'argb' => 'FFA07A',
+                'borders' => array(
+                    'top' => array(
+                        'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    ),
                 ),
-            ),
-        );
+                'fill' => array(
+                    'type' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
+                    'rotation' => 90,
+                    'startcolor' => array(
+                        'argb' => 'FFA07A',
+                    ),
+                    'endcolor' => array(
+                        'argb' => 'FFA07A',
+                    ),
+                ),
+            );
 
-        $spreadsheet->getActiveSheet()->freezePane('F2');
-        $spreadsheet->getActiveSheet()->getRowDimension('1')->setRowHeight(30);
-        $spreadsheet->getActiveSheet()->getStyle('A1:P1')->applyFromArray($styleArray1);
-        $spreadsheet->getActiveSheet()->getStyle('Q1:X1')->applyFromArray($styleArray2);
-        $spreadsheet->getActiveSheet()->getStyle('Y1:AB1')->applyFromArray($styleArray3);
-        $spreadsheet->getActiveSheet()->getStyle('AC1:AJ1')->applyFromArray($styleArray4);
-        $spreadsheet->getActiveSheet()->getStyle('AK1:AR1')->applyFromArray($styleArray5);
-        $spreadsheet->getActiveSheet()->getStyle('AS1:BA1')->applyFromArray($styleArray6);
-        $spreadsheet->getActiveSheet()->getStyle('BB1:BF1')->applyFromArray($styleArray7);
+            $spreadsheet->getActiveSheet()->freezePane('F2');
+            $spreadsheet->getActiveSheet()->getRowDimension('1')->setRowHeight(30);
+            $spreadsheet->getActiveSheet()->getStyle('A1:P1')->applyFromArray($styleArray1);
+            $spreadsheet->getActiveSheet()->getStyle('Q1:X1')->applyFromArray($styleArray2);
+            $spreadsheet->getActiveSheet()->getStyle('Y1:AB1')->applyFromArray($styleArray3);
+            $spreadsheet->getActiveSheet()->getStyle('AC1:AJ1')->applyFromArray($styleArray4);
+            $spreadsheet->getActiveSheet()->getStyle('AK1:AR1')->applyFromArray($styleArray5);
+            $spreadsheet->getActiveSheet()->getStyle('AS1:BA1')->applyFromArray($styleArray6);
+            $spreadsheet->getActiveSheet()->getStyle('BB1:BF1')->applyFromArray($styleArray7);
 //        $spreadsheet->getActiveSheet()->getStyle('A1:BF1')->applyFromArray($styleArray);
-        $spreadsheet->getActiveSheet()->getDefaultStyle()->applyFromArray($styleArray);
+            $spreadsheet->getActiveSheet()->getDefaultStyle()->applyFromArray($styleArray);
 
-        // Auto size columns for each worksheet
-        foreach ($spreadsheet->getWorksheetIterator() as $worksheet) {
-            $spreadsheet->setActiveSheetIndex($spreadsheet->getIndex($worksheet));
-            $sheet = $spreadsheet->getActiveSheet();
-            $cellIterator = $sheet->getRowIterator()->current()->getCellIterator();
-            $cellIterator->setIterateOnlyExistingCells(true);
-            /** @var PHPExcel_Cell $cell */
-            foreach ($cellIterator as $cell) {
-                $sheet->getColumnDimension($cell->getColumn())->setAutoSize(true);
+            // Auto size columns for each worksheet
+            foreach ($spreadsheet->getWorksheetIterator() as $worksheet) {
+                $spreadsheet->setActiveSheetIndex($spreadsheet->getIndex($worksheet));
+                $sheet = $spreadsheet->getActiveSheet();
+                $cellIterator = $sheet->getRowIterator()->current()->getCellIterator();
+                $cellIterator->setIterateOnlyExistingCells(true);
+                /** @var PHPExcel_Cell $cell */
+                foreach ($cellIterator as $cell) {
+                    $sheet->getColumnDimension($cell->getColumn())->setAutoSize(true);
+                }
             }
-        }
-        
-        // Auto size columns for each worksheet************End
-        
-        // set the names of header cells
-       $spreadsheet->setActiveSheetIndex(0)
+
+            // Auto size columns for each worksheet************End
+
+            // set the names of header cells
+            $spreadsheet->setActiveSheetIndex(0)
                 ->setCellValue("A1", 'Client')
                 ->setCellValue("B1", 'Client_Code')
                 ->setCellValue("C1", 'SaiSun_Emp_Code')
@@ -492,32 +495,31 @@ class Payroll extends CI_Controller
                 ->setCellValue("BF1", 'Total CTC');
 
 
+            $spreadsheet->getActiveSheet()->getStyle('H2:H' . $countarray)
+                ->getNumberFormat()
+                ->setFormatCode(
+                    '00000000000'
+                );
 
-        $spreadsheet->getActiveSheet()->getStyle('H2:H' . $countarray)
+            $spreadsheet->getActiveSheet()->getStyle('I2:I' . $countarray)
                 ->getNumberFormat()
                 ->setFormatCode(
-                        '00000000000'
-        );
+                    '00000000000'
+                );
+            $spreadsheet->getActiveSheet()->getStyle('J2:J' . $countarray)
+                ->getNumberFormat()
+                ->setFormatCode(
+                    '00000000000'
+                );
+            $spreadsheet->getActiveSheet()->getStyle('AC2:AC' . $countarray)
+                ->getNumberFormat()
+                ->setFormatCode(
+                    '00000000000'
+                );
 
-        $spreadsheet->getActiveSheet()->getStyle('I2:I' . $countarray)
-                ->getNumberFormat()
-                ->setFormatCode(
-                        '00000000000'
-        );
-        $spreadsheet->getActiveSheet()->getStyle('J2:J' . $countarray)
-                ->getNumberFormat()
-                ->setFormatCode(
-                        '00000000000'
-        );
-        $spreadsheet->getActiveSheet()->getStyle('AC2:AC' . $countarray)
-                ->getNumberFormat()
-                ->setFormatCode(
-                        '00000000000'
-        );
-
-        $x = 2;
-        foreach ($form_array as $sub) {
-            $spreadsheet->setActiveSheetIndex(0)
+            $x = 2;
+            foreach ($form_array as $sub) {
+                $spreadsheet->setActiveSheetIndex(0)
                     ->setCellValue("A$x", $sub['0'])
                     ->setCellValue("B$x", $sub['1'])
                     ->setCellValue("C$x", $sub['2'])
@@ -587,11 +589,10 @@ class Payroll extends CI_Controller
 //                    ->setCellValue("AQ$x", $sub['66'])
 //                    ->setCellValue("AR$x", $sub['67'])
                     ->setCellValue("AS$x", $sub['44'])
-                    
 //                    ->setCellValue("AR$x", $sub['69'])
 //                    ->setCellValue("AS$x", $sub['70'])
 //                    ->setCellValue("AT$x", $sub['71'])
-                    
+
                     ->setCellValue("AT$x", $sub['45'])
                     ->setCellValue("AU$x", $sub['46'])
                     ->setCellValue("AV$x", $sub['47'])
@@ -605,334 +606,324 @@ class Payroll extends CI_Controller
                     ->setCellValue("BD$x", $sub['55'])
                     ->setCellValue("BE$x", $sub['56'])
                     ->setCellValue("BF$x", $sub['57']);
-            $x++;
-        }
+                $x++;
+            }
 
 // Rename worksheet
-        $spreadsheet->getActiveSheet()->setTitle('Users Information');
+            $spreadsheet->getActiveSheet()->setTitle('Users Information');
 
 // set right to left direction
 //      $spreadsheet->getActiveSheet()->setRightToLeft(true);
 // Set active sheet index to the first sheet, so Excel opens this as the first sheet
-        $spreadsheet->setActiveSheetIndex(0);
+            $spreadsheet->setActiveSheetIndex(0);
 // Redirect output to a client’s web browser (Excel2007)
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="payroll_report.xlsx"');
-        header('Cache-Control: max-age=0');
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="payroll_report.xlsx"');
+            header('Cache-Control: max-age=0');
 // If you're serving to IE 9, then the following may be needed
-        header('Cache-Control: max-age=1');
+            header('Cache-Control: max-age=1');
 
 // If you're serving to IE over SSL, then the following may be needed
-        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
-        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
-        header('Pragma: public'); // HTTP/1.0
+            header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+            header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+            header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+            header('Pragma: public'); // HTTP/1.0
 
-        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Excel2007');
-        ob_end_clean();
-        $writer->save('php://output');
-          //$this->session->set_flashdata('message', 'Payroll Download Successfully');   
-        exit;
+            $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Excel2007');
+            ob_end_clean();
+            $writer->save('php://output');
+            //$this->session->set_flashdata('message', 'Payroll Download Successfully');
+            exit;
+        } else {
+            $this->session->set_flashdata('message_error', 'Record Not Found');
+
         }
-        else{
-          $this->session->set_flashdata('message_error', 'Record Not Found');   
-            
-        }
-       
+
         redirect(base_url() . 'payroll', 'refresh');
     }
-    
-	public function payroll_generate() {
-       
+
+    public function payroll_generate()
+    {
+
         $year = $this->input->post('year');
         $month = $this->input->post('month');
         $employee_list = $this->db->order_by('id', 'ASC')->get_where('employee', array('status' => 1))->result();
-       $table =  "devicelogs_".$month."_".$year ; 
-		//$employee_list= $this->db->order_by('EmployeeId')->get('employees')->result();
-		
-		$month_days=cal_days_in_month(CAL_GREGORIAN, $month, $year );
-		
-		for($i=1;$i<=1;$i++)
-		$all_date_arr[]=$year.'-'.(($month<10)?'0'.$month:$month).'-'.(($i<10)?'0'.$i:$i);
-		
-		$holidays=$this->db->query("SELECT * FROM `holiday` WHERE date BETWEEN '$year-$month-01' and '$year-$month-31'")->num_rows();//2;
-		
-		$weekend=$this->sunday_ina_month($month, $year);
-		
-		$total_working_days=$month_days - $holidays - $weekend;
-		$employee_arr=array();
-		$payroll_date=$month.",".$year;
-		$payrolls = $this->db->get_where('payroll', array('date' =>$payroll_date))->result();
-		if(empty($payrolls)){
-		if ($this->db->table_exists($table) )
-{
-       
-        foreach ($employee_list as $employee) {
-		if($employee->date_of_joining<= $all_date_arr[0] && $employee->date_of_leaving>=$all_date_arr[0]){
-		
-		
-		
-		$late_min=0;
-		$late_min1=0;
-		$late_min2=0;
-		$absent=0;
-		$comming_days=0;
-		$late_count=0;
-		$UserId=$employee->emp_code;
-		$lwp=0;
-		$paid_leave=0;
-		$total_pf=0;
-		$total_esic=0;
-		$total_deduction=0;
-		
-		$grosssal=0;
-		$payout=0;
-		$emp_cat_row=$this->db->get_where('employee_cat',array('id'=>$employee->emp_cat))->row();
-		$given_max_cl=$emp_cat_row->cl;
-		$given_max_ml=$emp_cat_row->ml;
-		$taken_cl=$this->db->get_where('leave',array('emp_id'=>$employee->id,'type'=>'CL','session_id'=>$this->session->userdata('current_session_id')))->num_rows();
-		$taken_ml=$this->db->get_where('leave',array('emp_id'=>$employee->id,'type'=>'ML','session_id'=>$this->session->userdata('current_session_id')))->num_rows();
-		
-		
-		$left_max_cl=$given_max_cl-$taken_cl;
-		$left_max_ml=$given_max_ml-$taken_ml;
-		
-		$qry="SELECT UserId as id, date_format(LogDate,'%Y-%m-%d') as date, MIN(LogDate) as colIn, MAX(LogDate) as colOut FROM $table where UserId='$UserId' group by date(LogDate)";
- 		$query = $this->db->query($qry);  
-         $comming_days= $query->num_rows(); 
-            $result= $query->result();
-		if($comming_days>0){
-		//echo  $sql=$this->db->last_query(); die;
-		
-		$absent=$total_working_days-$comming_days;
-		
-		foreach($result as $value){
-		$employee_arr1=array();
-		$cintime=$value->date.' 10:00:00';
-		$couttime=$value->date.' 19:00:00';
-		if($value->colIn>$cintime){
-			$datetime1 = new DateTime($cintime);
-			$datetime2 = new DateTime($value->colIn);
-			$interval = $datetime1->diff($datetime2);
-			//$elapsed = $interval->format('%y years %m months %a days %h hours %i minutes %s seconds');
-			$hours   = $interval->format('%h'); 
-			$minutes = $interval->format('%i');
-			$late_min1+=($hours * 60 + $minutes);
-			$late_count++;
-		}
-		if($value->colOut<$couttime){
-			$datetime11 = new DateTime($couttime);
-			$datetime21 = new DateTime($value->colOut);
-			$interval1 = $datetime11->diff($datetime21);
-			//$elapsed = $interval->format('%y years %m months %a days %h hours %i minutes %s seconds');
-			$hours1   = $interval1->format('%h'); 
-			$minutes1 = $interval1->format('%i');
-			$late_min2+=($hours1 * 60 + $minutes1);
-		}
-		$pdate_arr[]=$value->date;
-		}
-		
-		 $late_min= $late_min1+$late_min2;
-		 
-		 
-		 
-		
-			}else{continue;}
-			/*print_r($pdate_arr);
-			echo '<br>';
-			print_r($all_date_arr);
-			$rleave=0;
-			for($j=0;$j<count($all_date_arr);$j++){
-			if(!in_array($all_date_arr[$j],$pdate_arr)){
-			$rleave++;
-			
-			}
-			
-			}*/
-			//echo 'ateek'. $rleave;
-		 $employee_arr1['user_id']=$UserId;
-		 $employee_arr1['total_days']=$month_days;
-		 $employee_arr1['Holidays']=$holidays;
-		 $employee_arr1['Weekend_days']=$weekend;
-		 $employee_arr1['working_days']=$total_working_days;
-		 $employee_arr1['present_days']=$comming_days;
-		 $employee_arr1['absent_days']=$absent;
-		 $employee_arr1['late_minute']=$late_min;
-		 $employee_arr1['late_count']=$late_count;
-		 $employee_arr1['salary']=$employee->salary;
-		 $employee_arr[]=$employee_arr1;
-		 /* one day salay*/
-		 
-		 $oneday_sal=$employee->salary/$month_days;
-		 
-		 
-		 
-		 $lwp=$absent;
-		 if($late_count>2){
-		 if($late_count==3)
-		 $lwp=$lwp+1;
-		 else
-		 $lwp=$lwp+intval($late_count/2);
-		 
-		 }
-		 if($month!=5 && $month!=6){
-		 	if(($left_max_cl>0 || $left_max_ml>0)&& $lwp>0){
-			
-		 $data_leave['date']=$month . ',' . $year;
-		 $leave_obj = $this->db->get_where('leave', array('date' => $data_leave['date'], 'emp_id' => $employee->id,'session_id'=>$this->session->userdata('current_session_id')))->row();
-                //$query= $payroll ;
+        $table = "devicelogs_" . $month . "_" . $year;
+        //$employee_list= $this->db->order_by('EmployeeId')->get('employees')->result();
 
-                if (empty($leave_obj)) {
-				
-					 $data_leave['date']=$month . ',' . $year;		
-					 $data_leave['emp_id']=$employee->id;
-					 $data_leave['session_id']=$this->session->userdata('current_session_id');
-					 $data_leave['type']='CL';
-					 $this->db->insert('leave', $data_leave);
-					 $paid_leave++;
-					 $lwp--;
-					 $left_max_cl--;
-					 if($left_max_cl>0 && $lwp>0){
-					 $this->db->insert('leave', $data_leave);
-					 $paid_leave++;
-					 $lwp--;
-					 $left_max_cl--;
-					 if($left_max_ml>0 && $lwp>0){
-					 $data_leave['date']=$month . ',' . $year;		
-					 $data_leave['emp_id']=$employee->id;
-					 $data_leave['session_id']=$this->session->userdata('current_session_id');
-					 $data_leave['type']='ML';
-					 $this->db->insert('leave', $data_leave);
-					 $paid_leave++;
-					 $lwp--;
-					 $left_max_ml--;
-					 }
-					 if($left_max_ml>0 && $lwp>0){
-					 $data_leave['date']=$month . ',' . $year;		
-					 $data_leave['emp_id']=$employee->id;
-					 $data_leave['session_id']=$this->session->userdata('current_session_id');
-					 $data_leave['type']='ML';
-					 $this->db->insert('leave', $data_leave);
-					 $paid_leave++;
-					 $lwp--;
-					 $left_max_ml--;
-					 }
-					 
-					 }
+        $month_days = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+        for ($i = 1; $i <= 1; $i++)
+            $all_date_arr[] = $year . '-' . (($month < 10) ? '0' . $month : $month) . '-' . (($i < 10) ? '0' . $i : $i);
+
+        $holidays = $this->db->query("SELECT * FROM `holiday` WHERE date BETWEEN '$year-$month-01' and '$year-$month-31'")->num_rows();//2;
+
+        $weekend = $this->sunday_ina_month($month, $year);
+
+        $total_working_days = $month_days - $holidays - $weekend;
+        $employee_arr = array();
+        $payroll_date = $month . "," . $year;
+        $payrolls = $this->db->get_where('payroll', array('date' => $payroll_date))->result();
+        if (empty($payrolls)) {
+            if ($this->db->table_exists($table)) {
+
+                foreach ($employee_list as $employee) {
+                    if ($employee->date_of_joining <= $all_date_arr[0] && $employee->date_of_leaving >= $all_date_arr[0]) {
+
+
+                        $late_min = 0;
+                        $late_min1 = 0;
+                        $late_min2 = 0;
+                        $absent = 0;
+                        $comming_days = 0;
+                        $late_count = 0;
+                        $UserId = $employee->emp_code;
+                        $lwp = 0;
+                        $paid_leave = 0;
+                        $total_pf = 0;
+                        $total_esic = 0;
+                        $total_deduction = 0;
+
+                        $grosssal = 0;
+                        $payout = 0;
+                        $emp_cat_row = $this->db->get_where('employee_cat', array('id' => $employee->emp_cat))->row();
+                        $given_max_cl = $emp_cat_row->cl;
+                        $given_max_ml = $emp_cat_row->ml;
+                        $taken_cl = $this->db->get_where('leave', array('emp_id' => $employee->id, 'type' => 'CL', 'session_id' => $this->session->userdata('current_session_id')))->num_rows();
+                        $taken_ml = $this->db->get_where('leave', array('emp_id' => $employee->id, 'type' => 'ML', 'session_id' => $this->session->userdata('current_session_id')))->num_rows();
+
+
+                        $left_max_cl = $given_max_cl - $taken_cl;
+                        $left_max_ml = $given_max_ml - $taken_ml;
+
+                        $qry = "SELECT UserId as id, date_format(LogDate,'%Y-%m-%d') as date, MIN(LogDate) as colIn, MAX(LogDate) as colOut FROM $table where UserId='$UserId' group by date(LogDate)";
+                        $query = $this->db->query($qry);
+                        $comming_days = $query->num_rows();
+                        $result = $query->result();
+                        if ($comming_days > 0) {
+                            //echo  $sql=$this->db->last_query(); die;
+
+                            $absent = $total_working_days - $comming_days;
+
+                            foreach ($result as $value) {
+                                $employee_arr1 = array();
+                                $cintime = $value->date . ' 10:00:00';
+                                $couttime = $value->date . ' 19:00:00';
+                                if ($value->colIn > $cintime) {
+                                    $datetime1 = new DateTime($cintime);
+                                    $datetime2 = new DateTime($value->colIn);
+                                    $interval = $datetime1->diff($datetime2);
+                                    //$elapsed = $interval->format('%y years %m months %a days %h hours %i minutes %s seconds');
+                                    $hours = $interval->format('%h');
+                                    $minutes = $interval->format('%i');
+                                    $late_min1 += ($hours * 60 + $minutes);
+                                    $late_count++;
+                                }
+                                if ($value->colOut < $couttime) {
+                                    $datetime11 = new DateTime($couttime);
+                                    $datetime21 = new DateTime($value->colOut);
+                                    $interval1 = $datetime11->diff($datetime21);
+                                    //$elapsed = $interval->format('%y years %m months %a days %h hours %i minutes %s seconds');
+                                    $hours1 = $interval1->format('%h');
+                                    $minutes1 = $interval1->format('%i');
+                                    $late_min2 += ($hours1 * 60 + $minutes1);
+                                }
+                                $pdate_arr[] = $value->date;
+                            }
+
+                            $late_min = $late_min1 + $late_min2;
+
+
+                        } else {
+                            continue;
+                        }
+                        /*print_r($pdate_arr);
+                        echo '<br>';
+                        print_r($all_date_arr);
+                        $rleave=0;
+                        for($j=0;$j<count($all_date_arr);$j++){
+                        if(!in_array($all_date_arr[$j],$pdate_arr)){
+                        $rleave++;
+
+                        }
+
+                        }*/
+                        //echo 'ateek'. $rleave;
+                        $employee_arr1['user_id'] = $UserId;
+                        $employee_arr1['total_days'] = $month_days;
+                        $employee_arr1['Holidays'] = $holidays;
+                        $employee_arr1['Weekend_days'] = $weekend;
+                        $employee_arr1['working_days'] = $total_working_days;
+                        $employee_arr1['present_days'] = $comming_days;
+                        $employee_arr1['absent_days'] = $absent;
+                        $employee_arr1['late_minute'] = $late_min;
+                        $employee_arr1['late_count'] = $late_count;
+                        $employee_arr1['salary'] = $employee->salary;
+                        $employee_arr[] = $employee_arr1;
+                        /* one day salay*/
+
+                        $oneday_sal = $employee->salary / $month_days;
+
+
+                        $lwp = $absent;
+                        if ($late_count > 2) {
+                            if ($late_count == 3)
+                                $lwp = $lwp + 1;
+                            else
+                                $lwp = $lwp + intval($late_count / 2);
+
+                        }
+                        if ($month != 5 && $month != 6) {
+                            if (($left_max_cl > 0 || $left_max_ml > 0) && $lwp > 0) {
+
+                                $data_leave['date'] = $month . ',' . $year;
+                                $leave_obj = $this->db->get_where('leave', array('date' => $data_leave['date'], 'emp_id' => $employee->id, 'session_id' => $this->session->userdata('current_session_id')))->row();
+                                //$query= $payroll ;
+
+                                if (empty($leave_obj)) {
+
+                                    $data_leave['date'] = $month . ',' . $year;
+                                    $data_leave['emp_id'] = $employee->id;
+                                    $data_leave['session_id'] = $this->session->userdata('current_session_id');
+                                    $data_leave['type'] = 'CL';
+                                    $this->db->insert('leave', $data_leave);
+                                    $paid_leave++;
+                                    $lwp--;
+                                    $left_max_cl--;
+                                    if ($left_max_cl > 0 && $lwp > 0) {
+                                        $this->db->insert('leave', $data_leave);
+                                        $paid_leave++;
+                                        $lwp--;
+                                        $left_max_cl--;
+                                        if ($left_max_ml > 0 && $lwp > 0) {
+                                            $data_leave['date'] = $month . ',' . $year;
+                                            $data_leave['emp_id'] = $employee->id;
+                                            $data_leave['session_id'] = $this->session->userdata('current_session_id');
+                                            $data_leave['type'] = 'ML';
+                                            $this->db->insert('leave', $data_leave);
+                                            $paid_leave++;
+                                            $lwp--;
+                                            $left_max_ml--;
+                                        }
+                                        if ($left_max_ml > 0 && $lwp > 0) {
+                                            $data_leave['date'] = $month . ',' . $year;
+                                            $data_leave['emp_id'] = $employee->id;
+                                            $data_leave['session_id'] = $this->session->userdata('current_session_id');
+                                            $data_leave['type'] = 'ML';
+                                            $this->db->insert('leave', $data_leave);
+                                            $paid_leave++;
+                                            $lwp--;
+                                            $left_max_ml--;
+                                        }
+
+                                    }
+                                }
+
+                            }
+                        }
+
+
+                        $total_deduction = $oneday_sal * $lwp;
+                        $total_deduction = round($total_deduction, 2);
+                        $grosssal = $employee->salary - $total_deduction;
+                        if ($employee->pf == 1) {
+                            $total_pf = ($grosssal * 10) / 100;
+                            $total_pf = round($total_pf, 2);
+                            if ($total_pf > 2040)
+                                $total_pf = 2040;
+                            $total_esic = (($grosssal - $total_pf) * 1.75) / 100;
+                            $total_esic = round($total_esic, 2);
+                        }
+                        $payout = $grosssal - $total_pf - $total_esic;
+
+                        $total_deduction = $total_deduction + $total_pf + $total_esic;
+                        //-------------
+                        $attendance = array();
+
+                        //echo $row->user_id;<br />
+
+                        $new_entry = array('type' => 'Month Days', 'amount' => $month_days);
+
+                        array_push($attendance, $new_entry);
+
+                        $new_entry = array('type' => 'Weekly-Off', 'amount' => $weekend);
+
+                        array_push($attendance, $new_entry);
+
+                        $new_entry = array('type' => 'Holiday-Off', 'amount' => $holidays);
+
+                        array_push($attendance, $new_entry);
+
+                        $new_entry = array('type' => 'Working Days', 'amount' => $total_working_days);
+
+                        array_push($attendance, $new_entry);
+
+                        $new_entry = array('type' => 'LWP', 'amount' => $lwp);
+
+                        array_push($attendance, $new_entry);
+
+                        $new_entry = array('type' => 'Present Days', 'amount' => $comming_days);
+
+                        array_push($attendance, $new_entry);
+
+                        $new_entry = array('type' => 'Paid Leaves', 'amount' => $paid_leave);
+
+                        array_push($attendance, $new_entry);
+
+                        //--------------------
+
+
+                        $data['payroll_code'] = substr(md5(rand(10000000, 2000000000)), 0, 7);
+                        $data['user_id'] = $employee->id;
+                        $data['attendance'] = json_encode($attendance);
+                        $data['grosssal'] = $grosssal;
+                        $data['total_pf'] = $total_pf;
+                        $data['total_esic'] = $total_esic;
+                        $data['total_deduction'] = $total_deduction;
+                        $data['payout'] = number_format((float)$payout, 2, '.', '');
+                        $data['date'] = $month . ',' . $year;
+                        $data['session_id'] = $this->session->userdata('current_session_id');
+                        $data['status'] = 1;
+                        //print_r($data);
+                        $payroll = $this->db->get_where('payroll', array('date' => $data['date'], 'user_id' => $employee->id))->row();
+                        //$query= $payroll ;
+
+                        if (!empty($payroll)) {
+
+                            $this->db->where('payroll_id', $payroll->payroll_id);
+                            $this->db->update('payroll', $data);
+                        } else
+                            $this->db->insert('payroll', $data);
+
+                    }
                 }
-					 
-           }        
-		 }
-		 
-		 
-		 
-		 $total_deduction=$oneday_sal*$lwp;
-		 $total_deduction=round($total_deduction,2);
-		 $grosssal=$employee->salary-$total_deduction;
-		 if($employee->pf==1){
-		 $total_pf=($grosssal*10)/100;
-		 $total_pf=round($total_pf,2);
-		 if($total_pf>2040)
-		 $total_pf=2040;
-		 $total_esic=(($grosssal-$total_pf)*1.75)/100;
-		 $total_esic=round($total_esic,2);
-		 }
-		 $payout=$grosssal-$total_pf-$total_esic;
-		 
-		 $total_deduction=$total_deduction+$total_pf+$total_esic;
-		 //-------------
-		 		$attendance = array();
 
-                //echo $row->user_id;<br />
+                if (!empty($employee_arr)) {
+                    $this->session->set_flashdata('message', 'Generated Successfully');
 
-                $new_entry = array('type' => 'Month Days', 'amount' => $month_days);
 
-                array_push($attendance, $new_entry);
-
-                $new_entry = array('type' => 'Weekly-Off', 'amount' => $weekend);
-
-                array_push($attendance, $new_entry);
-
-                $new_entry = array('type' => 'Holiday-Off', 'amount' => $holidays);
-
-                array_push($attendance, $new_entry);
-
-                $new_entry = array('type' => 'Working Days', 'amount' => $total_working_days);
-
-                array_push($attendance, $new_entry);
-
-                $new_entry = array('type' => 'LWP', 'amount' => $lwp);
-
-                array_push($attendance, $new_entry);
-
-                $new_entry = array('type' => 'Present Days', 'amount' => $comming_days);
-
-                array_push($attendance, $new_entry);
-
-                $new_entry = array('type' => 'Paid Leaves', 'amount' => $paid_leave);
-
-                array_push($attendance, $new_entry);
-
-               //--------------------
-		 
-		 
-		 
-		 
-		$data['payroll_code'] = substr(md5(rand(10000000,2000000000)), 0, 7);
-		$data['user_id'] = $employee->id;
-		$data['attendance'] = json_encode($attendance);
-		$data['grosssal']=$grosssal;
-		$data['total_pf']=$total_pf;
-		$data['total_esic']=$total_esic;
-		$data['total_deduction']=$total_deduction;
-		$data['payout']=number_format((float)$payout, 2, '.', '');
-		$data['date'] = $month . ',' . $year;
-		$data['session_id']=$this->session->userdata('current_session_id');
-		$data['status'] = 1;
-		//print_r($data);
-		$payroll = $this->db->get_where('payroll', array('date' => $data['date'], 'user_id' => $employee->id))->row();
-                //$query= $payroll ;
-
-                if (!empty($payroll)) {
-
-                    $this->db->where('payroll_id', $payroll->payroll_id);
-                    $this->db->update('payroll', $data);
+                } else {
+                    $this->session->set_flashdata('message_error', 'Record Not Found');
                 }
-					 else
-                    $this->db->insert('payroll', $data);
-		
-		}
-		}
-
-        if (!empty($employee_arr)) {
-		$this->session->set_flashdata('message', 'Generated Successfully'); 
-		
-		
+            } else {
+                $this->session->set_flashdata('message_error', 'Record Not Found');
             }
-		
-        else{
-          $this->session->set_flashdata('message_error', 'Record Not Found');   
-           }
-       }
-	   else{
-          $this->session->set_flashdata('message_error', 'Record Not Found');   
-           }
-		} 
-		else{
-          $this->session->set_flashdata('message_error', 'Payroll Exist!');   
-           }  
-		   
+        } else {
+            $this->session->set_flashdata('message_error', 'Payroll Exist!');
+        }
+
         redirect(base_url() . 'payroll', 'refresh');
     }
-	
-    public function payrolllist() {
-       
-        $year = ($this->input->post('year'))?$this->input->post('year'):date('Y');
+
+    public function payrolllist()
+    {
+
+        $year = ($this->input->post('year')) ? $this->input->post('year') : date('Y');
         $month = $this->input->post('month');
         if ($month != '') {
 
             $payroll = $this->db->get_where('payroll', array('date' => $month . ',' . $year))->result_array();
-			 //$this->session->set_flashdata('message_error', 'Record Found');
+            //$this->session->set_flashdata('message_error', 'Record Found');
             if (empty($payroll)) {
                 //$this->session->set_flashdata('message_error', 'Record Not Found');
             }
@@ -940,38 +931,38 @@ class Payroll extends CI_Controller
             $data['pay'] = $payroll;
         }
 
-		$data['month']=$month;
-		$data['year']=$year;
+        $data['month'] = $month;
+        $data['year'] = $year;
         $data['content'] = 'payroll/payroll_list_view';
         $this->load->view('common/master', $data);
     }
-    
+
     public function payslip_pdf($id)
     {
         $data['param2'] = $id;
 //        $data['content'] = 'payroll/payroll_details_new';
 //        $data[] = $id;
         //load the view and saved it into $html variable
-        $html=$this->load->view('payroll/payroll_details_new', $data, true);
- 
+        $html = $this->load->view('payroll/payroll_details_new', $data, true);
+
         //this the the PDF filename that user will get to download
         $pdfFilePath = "output_pdf_name.pdf";
- 
+
         //load mPDF library
         $this->load->library('m_pdf');
- 
-       //generate the PDF from the given html
+
+        //generate the PDF from the given html
         $this->m_pdf->pdf->WriteHTML($html);
- 
+
         //download it.
-        $this->m_pdf->pdf->Output($pdfFilePath, "D");        
+        $this->m_pdf->pdf->Output($pdfFilePath, "D");
     }
-    
-     public function paylist()
+
+    public function paylist()
     {
         $q = urldecode($this->input->get('q', TRUE));
         $start = intval($this->input->get('start'));
-        
+
         if ($q <> '') {
             $config['base_url'] = base_url() . 'category/index.html?q=' . urlencode($q);
             $config['first_url'] = base_url() . 'category/index.html?q=' . urlencode($q);
@@ -997,19 +988,21 @@ class Payroll extends CI_Controller
         $this->load->view('common/master', $data);
 
     }
-    
-    public function employee_payslip($id) {
-        
+
+    public function employee_payslip($id)
+    {
+
         $list = $this->Payroll_model->get_by_id($id);
 //        print_r($list);
         $data['payroll'] = $list;
         $data['payroll_id'] = $id;
         $data['content'] = 'payroll/payroll_edit_form';
         $this->load->view('common/master', $data);
-        
+
     }
-    
-    public function edit_payroll() {
+
+    public function edit_payroll()
+    {
         $payroll_id = $this->input->post('payroll_id');
         $salarypart = array();
         $salpart_types = $this->input->post('salary_earned_title');
@@ -1045,7 +1038,7 @@ class Payroll extends CI_Controller
         $arrear = json_encode($arrear_part);
         $allowance_part = array();
         $allowance_types = $this->input->post('allow_title');
-       
+
         $allowance_amounts = $this->input->post('allow_amount');
         $number_of_entries = sizeof($allowance_types);
         $total_allowance = 0;
@@ -1101,7 +1094,7 @@ class Payroll extends CI_Controller
         $ctc = $total_earned_gross + $total_empr_salary;
 
         $data = array(
-            
+
             'grosssal' => $total_earned_gross,
             'salary_earned' => $earned,
             'total_allowance' => $total_allowance,
@@ -1122,21 +1115,22 @@ class Payroll extends CI_Controller
         echo "window.close();";
         echo "</script>";
     }
-	
-	public function sunday_ina_month($month, $year){
-	$sundays=0;
-    $total_days=cal_days_in_month(CAL_GREGORIAN, $month, $year);
-    for($i=1;$i<=$total_days;$i++)
-    if(date('N',strtotime($year.'-'.$month.'-'.$i))==7)
-    $sundays++;
-    return $sundays;
-	}
-	
-	 public function excel($month=0,$year=0)
+
+    public function sunday_ina_month($month, $year)
     {
-       
-		$this->load->helper('exportexcel');
-         $namaFile = $month.'_'.$year."_Payroll.xls";
+        $sundays = 0;
+        $total_days = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+        for ($i = 1; $i <= $total_days; $i++)
+            if (date('N', strtotime($year . '-' . $month . '-' . $i)) == 7)
+                $sundays++;
+        return $sundays;
+    }
+
+    public function excel($month = 0, $year = 0)
+    {
+
+        $this->load->helper('exportexcel');
+        $namaFile = $month . '_' . $year . "_Payroll.xls";
         $judul = "Payroll";
         $tablehead = 0;
         $tablebody = 1;
@@ -1155,29 +1149,29 @@ class Payroll extends CI_Controller
 
         $kolomhead = 0;
         xlsWriteLabel($tablehead, $kolomhead++, "No");
-	xlsWriteLabel($tablehead, $kolomhead++, "Employee");
-	xlsWriteLabel($tablehead, $kolomhead++, "Gross Salary");
-	xlsWriteLabel($tablehead, $kolomhead++, "PF");
-	xlsWriteLabel($tablehead, $kolomhead++, "ESIC");
-	xlsWriteLabel($tablehead, $kolomhead++, "Total Deduction");
-	xlsWriteLabel($tablehead, $kolomhead++, "Payout");
-	xlsWriteLabel($tablehead, $kolomhead++, "Date");
-	
-	$payroll = $this->db->get_where('payroll', array('date' => $month . ',' . $year))->result();
-	foreach ($payroll as $data) {
+        xlsWriteLabel($tablehead, $kolomhead++, "Employee");
+        xlsWriteLabel($tablehead, $kolomhead++, "Gross Salary");
+        xlsWriteLabel($tablehead, $kolomhead++, "PF");
+        xlsWriteLabel($tablehead, $kolomhead++, "ESIC");
+        xlsWriteLabel($tablehead, $kolomhead++, "Total Deduction");
+        xlsWriteLabel($tablehead, $kolomhead++, "Payout");
+        xlsWriteLabel($tablehead, $kolomhead++, "Date");
+
+        $payroll = $this->db->get_where('payroll', array('date' => $month . ',' . $year))->result();
+        foreach ($payroll as $data) {
             $kolombody = 0;
-			$employee_name=$this->db->get_where('employee', array('id' => $data->user_id))->row()->name;
+            $employee_name = $this->db->get_where('employee', array('id' => $data->user_id))->row()->name;
             //ubah xlsWriteLabel menjadi xlsWriteNumber untuk kolom numeric
             xlsWriteNumber($tablebody, $kolombody++, $nourut);
-	    xlsWriteLabel($tablebody, $kolombody++, $employee_name);
-	    xlsWriteNumber($tablebody, $kolombody++, $data->grosssal);
-	    xlsWriteNumber($tablebody, $kolombody++, $data->total_pf);
-	    xlsWriteNumber($tablebody, $kolombody++, $data->total_esic);
-	    xlsWriteNumber($tablebody, $kolombody++, $data->total_deduction);
-	    xlsWriteNumber($tablebody, $kolombody++, $data->payout);
-		xlsWriteLabel($tablebody, $kolombody++, $data->date);
+            xlsWriteLabel($tablebody, $kolombody++, $employee_name);
+            xlsWriteNumber($tablebody, $kolombody++, $data->grosssal);
+            xlsWriteNumber($tablebody, $kolombody++, $data->total_pf);
+            xlsWriteNumber($tablebody, $kolombody++, $data->total_esic);
+            xlsWriteNumber($tablebody, $kolombody++, $data->total_deduction);
+            xlsWriteNumber($tablebody, $kolombody++, $data->payout);
+            xlsWriteLabel($tablebody, $kolombody++, $data->date);
 
-	    $tablebody++;
+            $tablebody++;
             $nourut++;
         }
 

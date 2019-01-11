@@ -11,9 +11,16 @@
     <link rel="shortcut icon" href="{{ url('images/favicon.png') }}"/>
     <link rel="stylesheet" href="{{ url('css/style.css') }}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.33.1/dist/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="{{ url('css/datepicker.css') }}">
+
+    {{-------Notification--------}}
+    <link rel="stylesheet" href="{{ url('css/lobibox.min.css') }}">
+    <script src="{{url('js/notification.min.js')}}"></script>
+    <script src="{{url('js/notification-custom-script.js')}}"></script>
+    {{-------Notification--------}}
+
     <style>
         #snackbar {
             visibility: hidden;
@@ -90,9 +97,9 @@
         <div class="container d-flex flex-row">
             <div class="text-center navbar-brand-wrapper d-flex align-items-top">
                 <a class="navbar-brand brand-logo" href="{{ url('dashboard') }}"><img
-                            src="{{ url('images/logo-inverse.svg') }}" alt="logo"/></a>
-                <a class="navbar-brand brand-logo-mini" href="{{ url('dashboard') }}"><img
-                            src="{{ url('images/logo-mini.svg') }}" alt="logo"/></a>
+                            src="{{ url('images/s_logo.png') }}" alt="logo"/></a>
+                {{--<a class="navbar-brand brand-logo-mini" href="{{ url('dashboard') }}"><img--}}
+                            {{--src="{{ url('images/logo-mini.svg') }}" alt="logo"/></a>--}}
             </div>
             <div class="navbar-menu-wrapper d-flex align-items-center">
                 <form class="search-field ml-auto" action="#">
@@ -126,11 +133,11 @@
                                     class="link-icon mdi mdi-television"></i><span
                                     class="menu-title">DASHBOARD</span></a>
                     </li>
-                    <li class="nav-item">
-                        <a href="pages/widgets.html" class="nav-link"><i
-                                    class="link-icon mdi mdi-apple-safari"></i><span
-                                    class="menu-title">WIDGETS</span></a>
-                    </li>
+                    {{--<li class="nav-item">--}}
+                        {{--<a href="pages/widgets.html" class="nav-link"><i--}}
+                                    {{--class="link-icon mdi mdi-apple-safari"></i><span--}}
+                                    {{--class="menu-title">WIDGETS</span></a>--}}
+                    {{--</li>--}}
 
                     <li class="nav-item mega-menu">
                         <a href="#" class="nav-link"><i class="link-icon mdi mdi-flag-outline"></i><span
@@ -138,45 +145,44 @@
                         <div class="submenu">
                             <div class="col-group-wrapper row">
                                 <div class="col-group col-md-3">
-                                    <p class="category-heading">User Pages</p>
+                                    <p class="category-heading">Miscellaneous</p>
                                     <ul class="submenu-item">
                                         <li class="nav-item"><a class="nav-link"
-                                                                href="pages/samples/login.html">Login</a></li>
-                                        <li class="nav-item"><a class="nav-link" href="pages/samples/login-2.html">Login
-                                                2</a></li>
-                                        <li class="nav-item"><a class="nav-link" href="pages/samples/register.html">Register</a>
-                                        </li>
-                                        <li class="nav-item"><a class="nav-link" href="pages/samples/register-2.html">Register
-                                                2</a></li>
-                                        <li class="nav-item"><a class="nav-link" href="pages/samples/lock-screen.html">Lockscreen</a>
-                                        </li>
-                                        <li class="nav-item"><a class="nav-link" href="pages/samples/landing.html">Landing
-                                                screen</a></li>
+                                                                href="{{url('holiday')}}">Holiday</a></li>
+
+                                        {{--<li class="nav-item"><a class="nav-link" href="pages/samples/register.html">Register</a>--}}
+                                        {{--</li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link" href="pages/samples/register-2.html">Register--}}
+                                                {{--2</a></li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link" href="pages/samples/lock-screen.html">Lockscreen</a>--}}
+                                        {{--</li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link" href="pages/samples/landing.html">Landing--}}
+                                                {{--screen</a></li>--}}
                                     </ul>
                                 </div>
                                 <div class="col-group col-md-3">
-                                    <p class="category-heading">Error Pages</p>
+                                    <p class="category-heading">Employee</p>
                                     <ul class="submenu-item">
-                                        <li class="nav-item"><a class="nav-link"
-                                                                href="pages/samples/error-400.html">400</a></li>
-                                        <li class="nav-item"><a class="nav-link"
-                                                                href="pages/samples/error-404.html">404</a></li>
-                                        <li class="nav-item"><a class="nav-link"
-                                                                href="pages/samples/error-500.html">500</a></li>
-                                        <li class="nav-item"><a class="nav-link"
-                                                                href="pages/samples/error-505.html">505</a></li>
+                                        <li class="nav-item"><a class="nav-link" href="{{url('employee-manage')}}">Employee Manage</a></li>
+                                        <li class="nav-item"><a class="nav-link" href="{{url('create-payrole')}}">Create Payrole</a></li>
+                                        {{--<li class="nav-item"><a class="nav-link"--}}
+                                                                {{--href="pages/samples/error-404.html">404</a></li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link"--}}
+                                                                {{--href="pages/samples/error-500.html">500</a></li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link"--}}
+                                                                {{--href="pages/samples/error-505.html">505</a></li>--}}
                                     </ul>
                                 </div>
                                 <div class="col-group col-md-3">
                                     <p class="category-heading">E-commerce</p>
                                     <ul class="submenu-item">
-                                        <li class="nav-item"><a class="nav-link" href="pages/samples/invoice.html">Invoice</a>
+                                        <li class="nav-item"><a class="nav-link" href="#">Invoice</a>
                                         </li>
-                                        <li class="nav-item"><a class="nav-link"
-                                                                href="pages/samples/pricing-table.html">Pricing
-                                                Table</a></li>
-                                        <li class="nav-item"><a class="nav-link"
-                                                                href="pages/samples/orders.html">Orders</a></li>
+                                        {{--<li class="nav-item"><a class="nav-link"--}}
+                                                                {{--href="pages/samples/pricing-table.html">Pricing--}}
+                                                {{--Table</a></li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link"--}}
+                                                                {{--href="pages/samples/orders.html">Orders</a></li>--}}
                                     </ul>
                                 </div>
                                 <div class="col-group col-md-3">
@@ -184,103 +190,103 @@
                                         <div class="col-12">
                                             <p class="category-heading">Layout</p>
                                             <ul class="submenu-item">
-                                                <li class="nav-item"><a class="nav-link" href="pages/layouts/rtl.html">RTL
+                                                <li class="nav-item"><a class="nav-link" href="#">RTL
                                                         Layout</a></li>
                                             </ul>
                                         </div>
-                                        <div class="col-12 mt-3">
-                                            <p class="category-heading">Documentation</p>
-                                            <ul class="submenu-item">
-                                                <li class="nav-item"><a class="nav-link"
-                                                                        href="pages/documentation.html">Documentation</a>
-                                                </li>
-                                            </ul>
-                                        </div>
+                                        {{--<div class="col-12 mt-3">--}}
+                                            {{--<p class="category-heading">Documentation</p>--}}
+                                            {{--<ul class="submenu-item">--}}
+                                                {{--<li class="nav-item"><a class="nav-link"--}}
+                                                                        {{--href="#">Documentation</a>--}}
+                                                {{--</li>--}}
+                                            {{--</ul>--}}
+                                        {{--</div>--}}
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </li>
-                    <li class="nav-item mega-menu">
-                        <a href="#" class="nav-link"><i class="link-icon mdi mdi-android-studio"></i><span
-                                    class="menu-title">FORMS</span><i class="menu-arrow"></i></a>
-                        <div class="submenu">
-                            <div class="col-group-wrapper row">
-                                <div class="col-group col-md-3">
-                                    <p class="category-heading">Basic Elements</p>
-                                    <ul class="submenu-item">
-                                        <li class="nav-item"><a class="nav-link" href="pages/forms/basic_elements.html">Basic
-                                                Elements</a></li>
-                                        <li class="nav-item"><a class="nav-link"
-                                                                href="pages/forms/advanced_elements.html">Advanced
-                                                Elements</a></li>
-                                        <li class="nav-item"><a class="nav-link" href="pages/forms/validation.html">Validation</a>
-                                        </li>
-                                        <li class="nav-item"><a class="nav-link"
-                                                                href="pages/forms/wizard.html">Wizard</a></li>
-                                        <li class="nav-item"><a class="nav-link" href="pages/forms/text_editor.html">Text
-                                                Editor</a></li>
-                                        <li class="nav-item"><a class="nav-link" href="pages/forms/code_editor.html">Code
-                                                Editor</a></li>
-                                    </ul>
-                                </div>
-                                <div class="col-group col-md-3">
-                                    <p class="category-heading">Charts</p>
-                                    <ul class="submenu-item">
-                                        <li class="nav-item"><a class="nav-link" href="pages/charts/chartjs.html">Chart
-                                                Js</a></li>
-                                        <li class="nav-item"><a class="nav-link"
-                                                                href="pages/charts/morris.html">Morris</a></li>
-                                        <li class="nav-item"><a class="nav-link" href="pages/charts/flot-chart.html">Flaot</a>
-                                        </li>
-                                        <li class="nav-item"><a class="nav-link" href="pages/charts/google-charts.html">Google
-                                                Chart</a></li>
-                                        <li class="nav-item"><a class="nav-link" href="pages/charts/sparkline.html">Sparkline</a>
-                                        </li>
-                                        <li class="nav-item"><a class="nav-link" href="pages/charts/c3.html">C3
-                                                Chart</a></li>
-                                        <li class="nav-item"><a class="nav-link" href="pages/charts/chartist.html">Chartist</a>
-                                        </li>
-                                        <li class="nav-item"><a class="nav-link" href="pages/charts/justGage.html">JustGage</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="col-group col-md-3">
-                                    <p class="category-heading">Maps</p>
-                                    <ul class="submenu-item">
-                                        <li class="nav-item"><a class="nav-link"
-                                                                href="pages/maps/mapeal.html">Mapeal</a></li>
-                                        <li class="nav-item"><a class="nav-link" href="pages/maps/vector-map.html">Vector
-                                                Map</a></li>
-                                        <li class="nav-item"><a class="nav-link" href="pages/maps/google-maps.html">Google
-                                                Map</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link"><i class="link-icon mdi mdi-asterisk"></i><span class="menu-title">APPS</span><i
-                                    class="menu-arrow"></i></a>
-                        <div class="submenu">
-                            <ul class="submenu-item">
-                                <li class="nav-item"><a class="nav-link" href="pages/apps/email.html">Email</a></li>
-                                <li class="nav-item"><a class="nav-link" href="pages/apps/calendar.html">Calendar</a>
-                                </li>
-                                <li class="nav-item"><a class="nav-link" href="pages/apps/todo.html">Todo List</a></li>
-                                <li class="nav-item"><a class="nav-link" href="pages/apps/gallery.html">Gallery</a></li>
-                            </ul>
-                        </div>
-                    </li>
+
+                    {{--<li class="nav-item mega-menu">--}}
+                        {{--<a href="#" class="nav-link"><i class="link-icon mdi mdi-android-studio"></i><span--}}
+                                    {{--class="menu-title">FORMS</span><i class="menu-arrow"></i></a>--}}
+                        {{--<div class="submenu">--}}
+                            {{--<div class="col-group-wrapper row">--}}
+                                {{--<div class="col-group col-md-3">--}}
+                                    {{--<p class="category-heading">Basic Elements</p>--}}
+                                    {{--<ul class="submenu-item">--}}
+                                        {{--<li class="nav-item"><a class="nav-link" href="pages/forms/basic_elements.html">Basic--}}
+                                                {{--Elements</a></li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link"--}}
+                                                                {{--href="pages/forms/advanced_elements.html">Advanced--}}
+                                                {{--Elements</a></li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link" href="pages/forms/validation.html">Validation</a>--}}
+                                        {{--</li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link"--}}
+                                                                {{--href="pages/forms/wizard.html">Wizard</a></li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link" href="pages/forms/text_editor.html">Text--}}
+                                                {{--Editor</a></li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link" href="pages/forms/code_editor.html">Code--}}
+                                                {{--Editor</a></li>--}}
+                                    {{--</ul>--}}
+                                {{--</div>--}}
+                                {{--<div class="col-group col-md-3">--}}
+                                    {{--<p class="category-heading">Charts</p>--}}
+                                    {{--<ul class="submenu-item">--}}
+                                        {{--<li class="nav-item"><a class="nav-link" href="pages/charts/chartjs.html">Chart--}}
+                                                {{--Js</a></li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link"--}}
+                                                                {{--href="pages/charts/morris.html">Morris</a></li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link" href="pages/charts/flot-chart.html">Flaot</a>--}}
+                                        {{--</li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link" href="pages/charts/google-charts.html">Google--}}
+                                                {{--Chart</a></li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link" href="pages/charts/sparkline.html">Sparkline</a>--}}
+                                        {{--</li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link" href="pages/charts/c3.html">C3--}}
+                                                {{--Chart</a></li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link" href="pages/charts/chartist.html">Chartist</a>--}}
+                                        {{--</li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link" href="pages/charts/justGage.html">JustGage</a>--}}
+                                        {{--</li>--}}
+                                    {{--</ul>--}}
+                                {{--</div>--}}
+                                {{--<div class="col-group col-md-3">--}}
+                                    {{--<p class="category-heading">Maps</p>--}}
+                                    {{--<ul class="submenu-item">--}}
+                                        {{--<li class="nav-item"><a class="nav-link"--}}
+                                                                {{--href="pages/maps/mapeal.html">Mapeal</a></li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link" href="pages/maps/vector-map.html">Vector--}}
+                                                {{--Map</a></li>--}}
+                                        {{--<li class="nav-item"><a class="nav-link" href="pages/maps/google-maps.html">Google--}}
+                                                {{--Map</a></li>--}}
+                                    {{--</ul>--}}
+                                {{--</div>--}}
+                            {{--</div>--}}
+                        {{--</div>--}}
+                    {{--</li>--}}
+                    {{--<li class="nav-item">--}}
+                        {{--<a href="#" class="nav-link"><i class="link-icon mdi mdi-asterisk"></i><span class="menu-title">APPS</span><i--}}
+                                    {{--class="menu-arrow"></i></a>--}}
+                        {{--<div class="submenu">--}}
+                            {{--<ul class="submenu-item">--}}
+                                {{--<li class="nav-item"><a class="nav-link" href="pages/apps/email.html">Email</a></li>--}}
+                                {{--<li class="nav-item"><a class="nav-link" href="pages/apps/calendar.html">Calendar</a>--}}
+                                {{--</li>--}}
+                                {{--<li class="nav-item"><a class="nav-link" href="pages/apps/todo.html">Todo List</a></li>--}}
+                                {{--<li class="nav-item"><a class="nav-link" href="pages/apps/gallery.html">Gallery</a></li>--}}
+                            {{--</ul>--}}
+                        {{--</div>--}}
+                    {{--</li>--}}
                     <li class="nav-item">
                         <a href="#" class="nav-link"><i class="link-icon mdi mdi-asterisk"></i><span class="menu-title">Settings</span><i
                                     class="menu-arrow"></i></a>
                         <div class="submenu">
                             <ul class="submenu-item">
-                                <li class="nav-item"><a class="nav-link" href="{{ url('manage-admin') }}">Manage
-                                        Admin</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{{ url('manage-plan') }}">Manage Plan</a>
-                                </li>
+                                <li class="nav-item"><a class="nav-link" href="{{ url('logout') }}">Logout</a></li>
+                                {{--<li class="nav-item"><a class="nav-link" href="{{ url('manage-plan') }}">Manage Plan</a>--}}
+                                {{--</li>--}}
                             </ul>
                         </div>
                     </li>
@@ -288,6 +294,29 @@
             </div>
         </div>
     </nav>
+    <div class="modal fade" id="my">
+        <div class="modal-dialog modal-md" id="modal_type">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h5 id="mh" class="modal-title">Modal Heading</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body" id="mb">
+                    Modal body..
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
     <div id="snackbar" class="TXT">
         <h5 id="mtm">Some text some message</h5>
     </div>
@@ -297,7 +326,7 @@
             $('#snackbar').addClass('show');
             setTimeout(function () {
                 $('#snackbar').removeClass('show');
-            }, 3000);
+            }, 5000);
         }
     </script>
     <!-- partial -->
@@ -313,8 +342,6 @@
             <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © 2018 <a
                         href="http://7eyeitsolutions.com/"
                         target="_blank">7eyeitsolutions</a>. All rights reserved.</span>
-            <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Hand-crafted & made with <i
-                        class="mdi mdi-heart text-danger"></i></span>
         </div>
     </footer>
 </div>
@@ -348,8 +375,18 @@
 <!-- container-scroller -->
 
 <!-- plugins:js -->
+<script src="{{ url('js/datepicker.js') }}"></script>
 
 <script>
+    $('.dtp').datepicker({
+        format: "dd-M-yyyy",
+        maxViewMode: 2,
+        // endDate: '-18y',
+        endDate: '+0d',
+        daysOfWeekHighlighted: "0",
+        autoclose: true,
+    });
+
     $(window).scroll(function () {
         var headerBottom = '.navbar.horizontal-layout .nav-bottom';
         if ($(window).scrollTop() >= 70) {
@@ -358,6 +395,16 @@
             $(headerBottom).removeClass('fixed-top');
         }
     });
+
+    function create_holiday() {
+        var uid = 1;
+        $('#my').modal('show');
+        $.get('{{ url('holiday/create') }}', {uid: uid}, function (data) {
+            $('#mh').html('Create New Holiday');
+            $('#mb').html(data);
+        });
+    }
+
 </script>
 
 
