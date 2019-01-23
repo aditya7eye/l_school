@@ -13,8 +13,12 @@ class AttendanceController extends Controller
     {
 //        return $data = $request->session()->get('adminmaster');
 //        $attendance_list = Attendancelogs::where(['is_active' => 1])->get();
-        $employee_list = EmployeeModel::where(['is_active' => 1])->orderBy('EmployeeId','desc')->get();
-        return view('employee.attendance_list')->with(['employee_list' => $employee_list]);
+        $year = $request->input('year');
+        $month = $request->input('month');
+        $employee_id = request('employee_id');
+//        $attendance = DB::select("SELECT * FROM `attendancelogs` WHERE EmployeeId = $employee_id and MONTH(AttendanceDate) = $month AND YEAR(AttendanceDate) = $year");
+        $attendance = Attendancelogs::whereMonth('AttendanceDate', '=', $month)->whereYear('AttendanceDate', '=', $year)->where('EmployeeId', '=', $employee_id)->get();
+        return view('employee.attendance_list')->with(['attendance' => $attendance, 'year' => $year, 'month' => $month, 'employee_id' => $employee_id]);
 
     }
 }

@@ -58,7 +58,7 @@
                         <div class="card">
                             <div class="table-responsive">
                                 <table class="center-aligned-table table table-bordered">
-                                    <thead style="background-color: #3506065e;">
+                                    <thead style="background-color: #34BF9B;">
                                     <tr>
                                         <th class="border-bottom-0" style="color:white;">#</th>
                                         <th class="border-bottom-0" style="color:white;">Name</th>

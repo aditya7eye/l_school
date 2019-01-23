@@ -48,92 +48,120 @@
                 {{--<br>--}}
                 <div class="card">
                     <div class="card-body">
-                        <h4>Attendance Report</h4>
+                        <h4 class="card-title">Attendance Report</h4>
                         <hr>
-                        <table class="center-aligned-table table table-responsive table-bordered" style="height: 500px; overflow: scroll;">
-                            <thead style="background-color: #3506065e;">
+                        <form class="forms-sample" action="{{ url('getAttendance') }}" method="get">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Month</label>
+                                        <select size="1" name="month" class="form-control">
+                                            <option {{isset($month)?$month == '01' ? 'selected':'' : ''}}value="01">
+                                                January
+                                            </option>
+                                            <option {{isset($month)?$month == '02' ? 'selected':'' : ''}} value="02">
+                                                February
+                                            </option>
+                                            <option {{isset($month)?$month == '03' ? 'selected':'' : ''}} value="03">
+                                                March
+                                            </option>
+                                            <option {{isset($month)?$month == '04' ? 'selected':'' : ''}} value="04">
+                                                April
+                                            </option>
+                                            <option {{isset($month)?$month == '05' ? 'selected':'' : ''}} value="05">
+                                                May
+                                            </option>
+                                            <option {{isset($month)?$month == '06' ? 'selected':'' : ''}} value="06">
+                                                June
+                                            </option>
+                                            <option {{isset($month)?$month == '07' ? 'selected':'' : ''}} value="07">
+                                                July
+                                            </option>
+                                            <option {{isset($month)?$month == '08' ? 'selected':'' : ''}} value="08">
+                                                August
+                                            </option>
+                                            <option {{isset($month)?$month == '09' ? 'selected':'' : ''}} value="09">
+                                                September
+                                            </option>
+                                            <option {{isset($month)?$month == '10' ? 'selected':'' : ''}} value="10">
+                                                October
+                                            </option>
+                                            <option {{isset($month)?$month == '11' ? 'selected':'' : ''}} value="11">
+                                                November
+                                            </option>
+                                            <option {{isset($month)?$month == '12' ? 'selected':'' : ''}} value="12">
+                                                December
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail3">Year</label>
+                                        @php
+                                            $already_selected_value = isset($year)?$year:"2019";
+                                            $earliest_year = 2001;
+                                            print '<select name="year" class="form-control">';
+                                                foreach (range(date('Y'), $earliest_year) as $x) {
+                                                print '<option value="'.$x.'"'.($x == $already_selected_value ? ' selected="selected"' : '').'>'.$x.'</option>';
+                                                }
+                                                print '</select>';
+                                        @endphp
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+
+                                    <div class="form-group">
+                                        @php
+                                            $employeelist = \App\EmployeeModel::where(['RecordStatus'=>1])->get();
+                                        @endphp
+                                        <label for="exampleInputEmail3">Employee List</label>
+                                        <select size="1" name="employee_id" class="form-control">
+                                            @foreach($employeelist as $employee)
+                                                <option {{isset($employee_id)?$employee_id==$employee->EmployeeId?'selected':'':''}} value="{{$employee->EmployeeId}}">{{$employee->EmployeeName}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <label for="exampleInputEmail3"></label><br>
+                                    <button type="submit" class="btn btn-warning mr-2">Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <br>
+                <div class="card">
+                    <div class="card-body">
+                        {{--<h4>Attendance Report</h4>--}}
+                        {{--<hr>--}}
+                        <table class="center-aligned-table table table-bordered" id="example">
+                            <thead style="background-color: #34BF9B;">
                             <tr>
-                                <th class="border-bottom-0" style="color:white;">Employee Code</th>
-                                <th class="border-bottom-0" style="color:white;">Present Days</th>
-                                <th class="border-bottom-0" style="color:white;">Absent Days</th>
-                                <th class="border-bottom-0" style="color:white;">Normal Working Hours</th>
-                                <th class="border-bottom-0" style="color:white;">OT Hours</th>
-                                <th class="border-bottom-0" style="color:white;">OT Days</th>
-                                <th class="border-bottom-0" style="color:white;">CL</th>
-                                <th class="border-bottom-0" style="color:white;">PL</th>
-                                <th class="border-bottom-0" style="color:white;">SL</th>
-                                <th class="border-bottom-0" style="color:white;">Total Leave</th>
-                                <th class="border-bottom-0" style="color:white;">Late Coming Days</th>
-                                <th class="border-bottom-0" style="color:white;">Late Coming Hours</th>
-                                <th class="border-bottom-0" style="color:white;">Early Going Days</th>
-                                <th class="border-bottom-0" style="color:white;">Early Going Hours</th>
-                                <th class="border-bottom-0" style="color:white;">Weekly Off</th>
-                                <th class="border-bottom-0" style="color:white;">Weekly Off Present</th>
-                                <th class="border-bottom-0" style="color:white;">Holiday</th>
-                                <th class="border-bottom-0" style="color:white;">Holiday Present</th>
+                                <th class="border-bottom-0" style="color:white;">Employee Name</th>
+                                <th class="border-bottom-0" style="color:white;">Attendance Date</th>
+                                <th class="border-bottom-0" style="color:white;">Check In</th>
+                                <th class="border-bottom-0" style="color:white;">Check Out</th>
                             </tr>
                             </thead>
 
                             <tbody>
-                            @if(count($employee_list) > 0)
-                                @foreach ($employee_list as $index => $employee)
+                            @if(count($attendance) > 0)
+                                @foreach ($attendance as $index => $attendanc)
                                     <tr>
-                                        @php
-                                            $absent_days = DB::selectOne("SELECT COUNT(AttendanceLogId) as absent_days FROM `attendancelogs` WHERE StatusCode = 'A' and EmployeeId = $employee->EmployeeId and MONTH(AttendanceDate) = 08 AND YEAR(AttendanceDate) = 2018");
-                                            $present_days = DB::selectOne("SELECT COUNT(AttendanceLogId) as present_days FROM `attendancelogs` WHERE StatusCode = 'P' and EmployeeId = $employee->EmployeeId and MONTH(AttendanceDate) = 08 AND YEAR(AttendanceDate) = 2018");
-                                            $OT_hours = DB::selectOne("SELECT sum(OverTime) as OT_hours FROM `attendancelogs` WHERE StatusCode = 'P' and EmployeeId = $employee->EmployeeId and MONTH(AttendanceDate) = 08 AND YEAR(AttendanceDate) = 2018");
-
-                                        $WeeklyOff = DB::selectOne("SELECT count(AttendanceLogId) as WeeklyOff FROM `attendancelogs` WHERE StatusCode = 'WO' and EmployeeId = $employee->EmployeeId and MONTH(AttendanceDate) = 08 AND YEAR(AttendanceDate) = 2018");
-                                        $WeeklyOffPresent = DB::selectOne("SELECT count(AttendanceLogId) as WeeklyOffPresent FROM `attendancelogs` WHERE StatusCode = 'WO' and Present = '1' and EmployeeId = $employee->EmployeeId and MONTH(AttendanceDate) = 08 AND YEAR(AttendanceDate) = 2018");
-                                        $Holiday = DB::selectOne("SELECT count(AttendanceLogId) as Holiday FROM `attendancelogs` WHERE StatusCode = 'WO' and Holiday = '1' and EmployeeId = $employee->EmployeeId and MONTH(AttendanceDate) = 08 AND YEAR(AttendanceDate) = 2018");
-                                        $HolidayPresent = DB::selectOne("SELECT count(AttendanceLogId) as HolidayPresent FROM `attendancelogs` WHERE StatusCode = 'WO' and Holiday = '1' and Present = '1' and EmployeeId = $employee->EmployeeId and MONTH(AttendanceDate) = 08 AND YEAR(AttendanceDate) = 2018");
-                                        @endphp
-                                        <td>{{ $employee->EmployeeCode }}</td>
-                                        <td>{{ $present_days->present_days }}</td>
-                                        <td>{{ $absent_days->absent_days }}</td>
-                                        <td>{{ $present_days->present_days }}</td>
-                                        <td>@php
-
-                                                $minutes = $OT_hours->OT_hours;
-        $zero    = new DateTime('@0');
-        $offset  = new DateTime('@' . $minutes * 60);
-        $diff    = $zero->diff($offset);
-       $diff->format('%a Days, %h Hours, %i Minutes');
-                                        @endphp
-
-
-                                            {{  $diff->format('%h Hrs, %i Mns') }}</td>
-                                        <td>{{  $diff->format('%a Days') }}</td>
-                                        <td>{{ $present_days->present_days }}</td>
-                                        <td>{{ $present_days->present_days }}</td>
-                                        <td>{{ $present_days->present_days }}</td>
-                                        <td>{{ $present_days->present_days }}</td>
-                                        <td>{{ $present_days->present_days }}</td>
-                                        <td>{{ $present_days->present_days }}</td>
-                                        <td>{{ $present_days->present_days }}</td>
-                                        <td>{{ $present_days->present_days }}</td>
-                                        <td>{{ $WeeklyOff->WeeklyOff }}</td>
-                                        <td>{{ $WeeklyOffPresent->WeeklyOffPresent }}</td>
-                                        <td>{{ $Holiday->Holiday }}</td>
-                                        <td>{{ $HolidayPresent->HolidayPresent }}</td>
-                                        {{--<td>--}}
-                                        {{--<button onclick="update_admin({{ $adminlistobj->id }})"--}}
-                                        {{--class="btn btn-primary ">Edit--}}
-                                        {{--</button>--}}
-                                        {{--<button onclick="del_admin({{ $adminlistobj->id }});"--}}
-                                        {{--class="btn btn-danger ">Delete--}}
-                                        {{--</button>--}}
-                                        {{--</td>--}}
+                                        <td>{{ isset($attendanc->employee->EmployeeName)?$attendanc->employee->EmployeeName :'' }}</td>
+                                        <td>{{ date_format(date_create($attendanc->AttendanceDate), "d-M-Y")}}</td>
+                                        <td>{{date_format(date_create($attendanc->InTime), "d-M-Y h:i A")}}</td>
+                                        <td>{{date_format(date_create($attendanc->OutTime), "d-M-Y h:i A")}}</td>
                                     </tr>
                                 @endforeach
                             @else
                                 <tr>
-                                    <td align="center" colspan="5">No Record Found</td>
-
+                                    <td align="center" colspan="5">< No Record Found ></td>
                                 </tr>
                             @endif
-
-
                             </tbody>
                         </table>
                         <div class="row">

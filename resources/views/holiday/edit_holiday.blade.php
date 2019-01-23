@@ -1,4 +1,4 @@
-<script src="{{ url('assets/js/validate.js') }}"></script>
+<script src="{{ url('js/validate.js') }}"></script>
 
 <form action="{{url('holiday/update')}}" id="holiday" method="post" enctype="multipart/form-data">
     @csrf

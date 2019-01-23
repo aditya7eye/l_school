@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\EmployeeLeaveLeft;
 use App\EmployeeLeaves;
 use App\EmployeeModel;
 use App\EmployeeType;
 use App\ErrorLog;
+use App\GatePass;
+use App\Overtime;
 use App\Payrole;
+use App\PFESIC;
 use App\SessionMaster;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -38,7 +42,7 @@ class PayrollController extends Controller
 
     public function create_payrole()
     {
-        $payroles = \Illuminate\Support\Facades\DB::select("SELECT DISTINCT(payrole.date), COUNT(id) as payrole_generated, created_time  FROM `payrole` WHERE 1 GROUP by payrole.date ORDER by payrole.date desc");
+        $payroles = DB::select("SELECT DISTINCT(payrole.date), COUNT(id) as payrole_generated, created_time  FROM `payrole` WHERE 1 GROUP by payrole.date ORDER by payrole.date desc");
         return view('employee.create_payrole')->with(['payroles' => $payroles]);
     }
 
@@ -91,6 +95,8 @@ class PayrollController extends Controller
                 $late_min = 0;
                 $late_min1 = 0;
                 $late_min2 = 0;
+                $overtime_min = 0;
+                $gatepassmin = 0;
                 $absent = 0;
                 $late_count = 0;
                 $UserId = $employee->emp_code;
@@ -98,18 +104,22 @@ class PayrollController extends Controller
                 $paid_leave = 0;
                 $total_pf = 0;
                 $total_esic = 0;
+                $total_gatepass = 0;
                 $total_deduction = 0;
 
                 $grosssal = 0;
                 $payout = 0;
                 $emp_cat_row = EmployeeType::where(['id' => $employee->type_id])->first();
 
-                $given_max_cl = 12;//$emp_cat_row->cl;
+                $employee_leave_left = EmployeeLeaveLeft::where(['employee_id' => $employee->EmployeeId, 'session_id' => $session_master->id])->first();
 
-                $given_max_ml = 7;//$emp_cat_row->ml;
+                $given_max_cl = isset($emp_cat_row->cl) ? $emp_cat_row->cl : 12;
 
-                $taken_cl = EmployeeLeaves::where(['employee_id' => $employee->id, 'leave_type' => 'CL', 'session_id' => $session_master->id])->count();
-                $taken_ml = EmployeeLeaves::where(['employee_id' => $employee->id, 'leave_type' => 'ML', 'session_id' => $session_master->id])->count();
+                $given_max_ml = isset($emp_cat_row->ml) ? $emp_cat_row->ml : 7;
+
+
+                $taken_cl = $given_max_cl - $employee_leave_left->cl;//EmployeeLeaves::where(['employee_id' => $employee->id, 'leave_type' => 'CL', 'session_id' => $session_master->id])->count();
+                $taken_ml = $given_max_ml - $employee_leave_left->ml;//EmployeeLeaves::where(['employee_id' => $employee->id, 'leave_type' => 'ML', 'session_id' => $session_master->id])->count();
 
 
                 $left_max_cl = $given_max_cl - $taken_cl;
@@ -120,6 +130,8 @@ class PayrollController extends Controller
 //            $absent_days = DB::selectOne("SELECT COUNT(AttendanceLogId) as absent_days FROM `attendancelogs` WHERE StatusCode = 'A' and EmployeeId = $employee->EmployeeId and MONTH(AttendanceDate) = $month AND YEAR(AttendanceDate) = $year");
 
                 $attendance_records = DB::select("SELECT * FROM `attendancelogs` WHERE StatusCode = 'P' and EmployeeId = $employee->EmployeeId and MONTH(AttendanceDate) = $month AND YEAR(AttendanceDate) = $year");
+
+
 
 //            $qry = "SELECT UserId as id, date_format(LogDate,'%Y-%m-%d') as date, MIN(LogDate) as colIn, MAX(LogDate) as colOut FROM $table where UserId='$UserId' group by date(LogDate)";
 //            $query = $this->db->query($qry);
@@ -133,11 +145,11 @@ class PayrollController extends Controller
                     $absent = $total_working_days - $present_days->present_days;
 
                     if (count($attendance_records) > 0) {
-
+                        $PFESIC = PFESIC::find(1);
                         foreach ($attendance_records as $value) {
                             $employee_arr1 = array();
-                            $cintime = date_format(date_create($value->AttendanceDate), "Y-m-d") . ' ' . $employee->school->opening_time;
-                            $couttime = date_format(date_create($value->AttendanceDate), "Y-m-d") . ' ' . $employee->school->closing_time;
+                            $cintime = date_format(date_create($value->AttendanceDate), "Y-m-d") . ' ' . $employee->check_in;
+                            $couttime = date_format(date_create($value->AttendanceDate), "Y-m-d") . ' ' . $employee->check_out;
                             if ($value->InTime > $cintime) {
                                 $datetime1 = new DateTime($cintime);
                                 $datetime2 = new DateTime($value->InTime);
@@ -145,7 +157,22 @@ class PayrollController extends Controller
                                 //$elapsed = $interval->format('%y years %m months %a days %h hours %i minutes %s seconds');
                                 $hours = $interval->format('%h');
                                 $minutes = $interval->format('%i');
-                                $late_min1 += ($hours * 60 + $minutes);
+                                $lmt = ($hours * 60 + $minutes);
+                                if ($lmt > $PFESIC->gate_pass_min) {
+                                    $gatepass = new GatePass();
+                                    $gatepass->employee_id = $employee->EmployeeId;
+                                    $gatepass->late_min = $lmt;
+                                    $gatepass->date = date_format(date_create($value->AttendanceDate), "Y-m-d");
+                                    $gatepass->session_id = $session_master->id;
+                                    $gatepass->save();
+                                    $gatepassmin += $lmt;
+                                    if (isset($employee_leave_left)) {
+                                        $employee_leave_left->gate_pass_min += $lmt;
+                                        $employee_leave_left->save();
+                                    }
+                                } else {
+                                    $late_min1 += $lmt;
+                                }
                                 $late_count++;
                             }
                             if ($value->OutTime < $couttime) {
@@ -156,6 +183,21 @@ class PayrollController extends Controller
                                 $hours1 = $interval1->format('%h');
                                 $minutes1 = $interval1->format('%i');
                                 $late_min2 += ($hours1 * 60 + $minutes1);
+                            }else{
+                                $datetime11 = new DateTime($value->OutTime);
+                                $datetime21 = new DateTime($couttime);
+                                $interval1 = $datetime11->diff($datetime21);
+                                //$elapsed = $interval->format('%y years %m months %a days %h hours %i minutes %s seconds');
+                                $hours1 = $interval1->format('%h');
+                                $minutes1 = $interval1->format('%i');
+                                $overtime_min += ($hours1 * 60 + $minutes1);
+
+                                $overtime = new Overtime();
+                                $overtime->employee_id = $employee->EmployeeId;
+                                $overtime->overtime_min = $overtime_min;
+                                $overtime->date = date_format(date_create($value->AttendanceDate), "Y-m-d");
+                                $overtime->session_id = $session_master->id;
+                                $overtime->save();
                             }
 //                        $pdate_arr[] = $value->AttendanceDate;
                         }
@@ -163,9 +205,6 @@ class PayrollController extends Controller
                     }
 
 
-                } else {
-//                echo "dsa";
-//                    continue;
                 }
                 /*********************Late Min/Count Calculation***************************/
 
@@ -202,6 +241,10 @@ class PayrollController extends Controller
                             $leave_model->session_id = $session_master->id;
                             $leave_model->leave_type = 'CL';
                             $leave_model->save();
+                            if (isset($employee_leave_left)) {
+                                $employee_leave_left->cl -= 1;
+                                $employee_leave_left->save();
+                            }
 //                        $this->db->insert('leave', $data_leave);
                             $paid_leave++;
                             $lwp--;
@@ -213,6 +256,10 @@ class PayrollController extends Controller
                                 $leave_model->session_id = $session_master->id;
                                 $leave_model->leave_type = 'CL';
                                 $leave_model->save();
+                                if (isset($employee_leave_left)) {
+                                    $employee_leave_left->cl -= 1;
+                                    $employee_leave_left->save();
+                                }
                                 $paid_leave++;
                                 $lwp--;
                                 $left_max_cl--;
@@ -226,9 +273,13 @@ class PayrollController extends Controller
                                     $leave_model = new EmployeeLeaves();
                                     $leave_model->date = $month . ',' . $year;
                                     $leave_model->employee_id = $employee->id;
-                                    $leave_model->session_id = $session_master->session;
+                                    $leave_model->session_id = $session_master->id;
                                     $leave_model->leave_type = 'ML';
                                     $leave_model->save();
+                                    if (isset($employee_leave_left)) {
+                                        $employee_leave_left->ml -= 1;
+                                        $employee_leave_left->save();
+                                    }
                                     $paid_leave++;
                                     $lwp--;
                                     $left_max_ml--;
@@ -242,9 +293,13 @@ class PayrollController extends Controller
                                     $leave_model = new EmployeeLeaves();
                                     $leave_model->date = $month . ',' . $year;
                                     $leave_model->employee_id = $employee->id;
-                                    $leave_model->session_id = $session_master->session;
+                                    $leave_model->session_id = $session_master->id;
                                     $leave_model->leave_type = 'ML';
                                     $leave_model->save();
+                                    if (isset($employee_leave_left)) {
+                                        $employee_leave_left->ml -= 1;
+                                        $employee_leave_left->save();
+                                    }
 
                                     $paid_leave++;
                                     $lwp--;
@@ -260,20 +315,43 @@ class PayrollController extends Controller
 
 
                 /*********************Gross Salary Deduction Calculation***************************/
+//                $gatepassHrs = $employee_leave_left->gate_pass_min->format('%h');
+//                $gatepassminutes = 0;
+//                $gatepasshours = floor($employee_leave_left->gate_pass_min / 60);
+//                $gatepassminutes += $employee_leave_left->gate_pass_min % 60;
+
+                $fullday = 0;
+                $halfday = 0;
+                $minCal = $employee_leave_left->gate_pass_min;
+                while ($minCal > 179) {
+                    if ($minCal > 360) {
+                        $minCal = $minCal - 360;
+                        $fullday++;
+                    } elseif ($minCal > 180) {
+                        $minCal = $minCal - 180;
+                        $halfday++;
+                    }
+                }
+                $employee_leave_left->gate_pass_min = $minCal;
+                $employee_leave_left->save();
+                $total_gatepass = $oneday_sal * $fullday + $halfday;
+
+//
                 $total_deduction = $oneday_sal * $lwp;
                 $total_deduction = round($total_deduction, 2);
-                $grosssal = $employee->salary - $total_deduction;
+                $grosssal = $employee->salary - $total_deduction - $total_gatepass;
                 if ($employee->is_pf_applied == 1) {
-                    $total_pf = ($grosssal * 10) / 100;
+                    $pf_esic = PFESIC::find(1);
+                    $total_pf = ($grosssal * $pf_esic->pf) / 100;
                     $total_pf = round($total_pf, 2);
                     if ($total_pf > 2040)
                         $total_pf = 2040;
-                    $total_esic = (($grosssal - $total_pf) * 1.75) / 100;
+                    $total_esic = (($grosssal - $total_pf) * $pf_esic->esic) / 100;
                     $total_esic = round($total_esic, 2);
                 }
                 $payout = $grosssal - $total_pf - $total_esic;
 
-                $total_deduction = $total_deduction + $total_pf + $total_esic;
+                $total_deduction = $total_deduction + $total_pf + $total_esic + $total_gatepass;
                 /*********************Gross Salary Deduction Calculation***************************/
 
                 $payrole_model = new Payrole();
@@ -285,6 +363,9 @@ class PayrollController extends Controller
                 $payrole_model->present_days = $present_days->present_days;
                 $payrole_model->absent_days = $absent;
                 $payrole_model->late_minute = $late_min;
+                $payrole_model->gatepassmin = $gatepassmin;
+                $payrole_model->overtime_min = $overtime_min;
+                $payrole_model->total_gatepass = $total_gatepass;
                 $payrole_model->late_count = $late_count;
                 $payrole_model->lwp = $lwp;
                 $payrole_model->paid_leave = $paid_leave;
@@ -300,15 +381,16 @@ class PayrollController extends Controller
                 $payrole_model->save();
 
             }
-            return redirect('create-payrole')->with('message', 'Payroll has been generated');
+            return redirect('create-payroll')->with('message', 'Payroll has been generated');
         } else {
-            return Redirect::back()->with('message', 'Payroll already generated for selected date');
+            return Redirect::back()->with('errmessage', 'Payroll already generated for selected date');
         }
     }
 
     public function delete_payroll()
     {
         Payrole::where(['date' => request('date')])->delete();
+        return redirect('create-payroll')->with('message', 'Payroll has been deleted');
     }
 
 }

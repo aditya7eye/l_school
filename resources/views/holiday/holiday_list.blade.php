@@ -20,12 +20,12 @@
                             </div>
                             <div class="card-body">
                                 <table id="order-listing" class="table table-striped w-100">
-                                    <thead>
+                                    <thead style="background-color: #34BF9B;">
                                     <tr>
-                                        <th>Holiday #</th>
-                                        <th>Date</th>
-                                        <th>Occasion</th>
-                                        <th>Action</th>
+                                        <th class="border-bottom-0" style="color:white;">Holiday #</th>
+                                        <th class="border-bottom-0" style="color:white;">Date</th>
+                                        <th class="border-bottom-0" style="color:white;">Occasion</th>
+                                        <th class="border-bottom-0" style="color:white;">Action</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -35,7 +35,8 @@
                                     @foreach($holidays as $holiday)
                                         <tr>
                                             <td>{{$count}}</td>
-                                            <td>{{$holiday->date}}</td>
+                                            <td>{{ date_format(date_create($holiday->date), "d-M-Y")}}</td>
+
                                             <td>{{$holiday->occasion}}</td>
                                             <td>
                                                 <a onclick="edit_holiday('{{$holiday->id}}')"
@@ -88,7 +89,8 @@
 
                 }
             }
-        );
+        )
+            ;
         }
 
 

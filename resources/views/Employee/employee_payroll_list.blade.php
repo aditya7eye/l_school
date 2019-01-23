@@ -64,11 +64,11 @@
                                 Back</a></h4>
                         <hr>
                         <table class="center-aligned-table table table-responsive table-bordered"
-                               style="height: 500px; overflow: scroll;">
-                            <thead style="background-color: #3506065e;">
+                               style="height: 500px; overflow: scroll;" id="example">
+                            <thead style="background-color: #34BF9B;">
                             <tr>
                                 <th class="border-bottom-0" style="color:white;">Month/Year</th>
-                                <th class="border-bottom-0" style="color:white;">Employee Code</th>
+                                <th class="border-bottom-0" style="color:white;">Employee Name</th>
                                 <th class="border-bottom-0" style="color:white;">Month Days</th>
                                 <th class="border-bottom-0" style="color:white;">Weekend Days</th>
                                 <th class="border-bottom-0" style="color:white;">holidays</th>
@@ -77,7 +77,9 @@
                                 <th class="border-bottom-0" style="color:white;">Absent Days</th>
                                 <th class="border-bottom-0" style="color:white;">Late Count</th>
                                 <th class="border-bottom-0" style="color:white;">Late Coming Minute</th>
+                                <th class="border-bottom-0" style="color:white;">Gatepass Minute</th>
                                 <th class="border-bottom-0" style="color:white;">Leave Without Pay</th>
+                                <th class="border-bottom-0" style="color:white;">Overtime Minute</th>
                                 <th class="border-bottom-0" style="color:white;">Paid Leave</th>
                                 <th class="border-bottom-0" style="color:white;">Salary</th>
                                 <th class="border-bottom-0" style="color:white;">Gross Salary</th>
@@ -94,7 +96,7 @@
                                 @foreach ($payroles as $index => $payrole)
                                     <tr>
                                         <td>{{ $payrole->date }}</td>
-                                        <td>{{ $payrole->employee->EmployeeCode }}</td>
+                                        <td>{{ $payrole->employee->EmployeeName }}</td>
                                         <td>{{ $payrole->month_days }}</td>
                                         <td>{{ $payrole->weekend_days }}</td>
                                         <td>{{ $payrole->holidays }}</td>
@@ -103,7 +105,9 @@
                                         <td>{{ $payrole->absent_days }}</td>
                                         <td>{{ $payrole->late_count }}</td>
                                         <td>{{ $payrole->late_minute }}</td>
+                                        <td>{{ $payrole->gatepassmin }}</td>
                                         <td>{{ $payrole->lwp }}</td>
+                                        <td>{{ $payrole->overtime_min }}</td>
                                         <td>{{ $payrole->paid_leave }}</td>
                                         <td>{{ $payrole->salary }}</td>
                                         <td>{{ $payrole->gross_salary }}</td>
