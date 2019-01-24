@@ -47,11 +47,10 @@
                                             @if(!isset($payroll))
                                                 <button type="button"
                                                         onclick="update_leave_left('{{ $emp_leave_left->id }}');"
-                                                        class="btn btn-primary ">Edit
+                                                        class="btn btn-success ">Edit
                                                 </button>
                                             @else
-                                                <a disabled="disabled" data-toggle="tooltip"
-                                                   title="Payroll already generated"> N/A</a>
+                                                <button type="button" disabled title="Payroll already generated" class="btn btn-success ">Edit</button>
                                             @endif
                                         </td>
                                     </tr>

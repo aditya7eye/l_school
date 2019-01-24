@@ -5,6 +5,8 @@
         .mybg {
             padding: 10px 10px;
         }
+
+
     </style>
 
     <div class="container-fluid page-body-wrapper" id="maindiv">
@@ -63,6 +65,85 @@
                 <br>
                 <div class="card">
                     <div class="card-body">
+                        <h4 class="card-title">Temporary Payroll List</h4>
+                        <hr>
+                        <table class=" table table-bordered" id="example1">
+                            <thead style="background-color: #34BF9B;">
+                            <tr>
+                                <th class="border-bottom-0" style="color:white;">Month</th>
+                                <th class="border-bottom-0" style="color:white;">Year</th>
+                                <th class="border-bottom-0" style="color:white;">Total Payroll</th>
+                                <th class="border-bottom-0" style="color:white;">Total PF (Rs.)</th>
+                                <th class="border-bottom-0" style="color:white;">Total ESIC(Rs.)</th>
+                                <th class="border-bottom-0" style="color:white;">Total Payout</th>
+                                <th class="border-bottom-0" style="color:white;">Generated Date</th>
+                                <th class="border-bottom-0" style="color:white;">Action</th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                            @if(count($temp_payroles) > 0)
+                                @foreach ($temp_payroles as $index => $payrole)
+                                    @php
+                                        $array  = explode(",", $payrole->date);
+                                    $total_pf = \App\TempPayrole::where(['date'=>$payrole->date])->sum('total_pf');
+                                    $total_esic = \App\TempPayrole::where(['date'=>$payrole->date])->sum('total_esic');
+                                    $total_payout = \App\TempPayrole::where(['date'=>$payrole->date])->sum('payout');
+                                    $modified_count = \App\TempPayrole::where(['date'=>$payrole->date,'is_modified'=>1])->count();
+
+                                    @endphp
+                                    <tr>
+                                        <td>{{ date('F', mktime(0, 0, 0, $array[0], 10)) }}</td>
+                                        <td>{{ $array[1]}}</td>
+                                        <td>{{ $payrole->payrole_generated }}</td>
+                                        <td><i class="mdi mdi-currency-inr"></i>{{ $total_pf }}</td>
+                                        <td><i class="mdi mdi-currency-inr"></i>{{ $total_esic}}</td>
+                                        <td><i class="mdi mdi-currency-inr"></i>{{ $total_payout }}</td>
+                                        <td>{{date_format(date_create($payrole->created_time), "d-M-Y h:i A")}}</td>
+                                        <td>
+
+                                            {{--<button type="button" onclick="del_payroll('{{$payrole->date}}')"--}}
+                                            {{--class="btn btn-sm btn-danger ">Delete--}}
+                                            {{--</button>--}}
+                                            {{--&nbsp;--}}
+                                            {{--<button type="button" onclick="del_payroll('{{$payrole->date}}')"--}}
+                                            {{--class="btn btn-sm btn-success ">Mark as locked--}}
+                                            {{--</button>--}}
+                                            <div class="dropdown btn-sm">
+                                                <button type="button" class="btn btn-success btn-xs dropdown-toggle"
+                                                        data-toggle="dropdown">
+                                                    Option
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item"
+                                                       href="{{url('view-temp-payroll').'/'.base64_encode($payrole->date)}}">View
+                                                        Temp Payrolls</a>
+                                                    <a class="dropdown-item"
+                                                       href="{{url('delete_payroll_temp?date=').$payrole->date}}">Delete
+                                                        Temp Payroll</a>
+                                                    @if($payrole->payrole_generated == $modified_count)
+                                                        <a class="dropdown-item"
+                                                           href="{{url('convert_payroll').'/'.base64_encode($payrole->date)}}" {{--onclick="del_payroll('{{$payrole->date}}')"--}} >Mark
+                                                            as locked</a>
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td align="center" colspan="8"> < No Record Found ></td>
+                                </tr>
+                            @endif
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <br>
+                <div class="card">
+                    <div class="card-body">
                         <h4 class="card-title">Generated Payroll List</h4>
                         <hr>
                         <table class=" table table-bordered" id="example">
@@ -71,11 +152,11 @@
                                 <th class="border-bottom-0" style="color:white;">Month</th>
                                 <th class="border-bottom-0" style="color:white;">Year</th>
                                 <th class="border-bottom-0" style="color:white;">Total Payroll</th>
-                                <th class="border-bottom-0" style="color:white;">Total PF</th>
-                                <th class="border-bottom-0" style="color:white;">Total ESIC</th>
+                                <th class="border-bottom-0" style="color:white;">Total PF (Rs.)</th>
+                                <th class="border-bottom-0" style="color:white;">Total ESIC(Rs.)</th>
                                 <th class="border-bottom-0" style="color:white;">Total Payout</th>
                                 <th class="border-bottom-0" style="color:white;">Generated Date</th>
-                                <th class="border-bottom-0" style="color:white;">Action</th>
+                                <th class="border-bottom-0" style="color:white; width: 100px !important;">Action</th>
                             </tr>
                             </thead>
 
@@ -97,7 +178,18 @@
                                         <td><i class="mdi mdi-currency-inr"></i>{{ $total_payout }}</td>
                                         <td>{{date_format(date_create($payrole->created_time), "d-M-Y h:i A")}}</td>
                                         <td>
-                                            <a href="{{url('view-payroll').'/'.base64_encode($payrole->date)}}" class="btn btn-primary btn-sm">View</a>
+                                            <div class="dropdown btn-sm">
+                                                <button type="button" class="btn btn-success btn-xs dropdown-toggle"
+                                                        data-toggle="dropdown">
+                                                    Option
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item"
+                                                       href="{{url('view-payroll').'/'.base64_encode($payrole->date)}}">View
+                                                        Payroll</a>
+                                                </div>
+                                            </div>
+
                                             {{--<button type="button" onclick="del_payroll('{{$payrole->date}}')"  class="btn btn-sm btn-danger ">Delete</button>--}}
 
                                         </td>
@@ -133,9 +225,9 @@
                 closeOnCancel: false,
                 buttons: true,
                 dangerMode: true,
-            }).then((willDelete) => {
+            }).then((willDelete) = > {
                 if (willDelete) {
-                    $.get('{{ url('delete_payroll') }}', {date: e_id}, function (data) {
+                    $.get('{{ url('delete_payroll_temp') }}', {date: e_id}, function (data) {
                         success_noti("Payroll has been deleted");
                         setTimeout(function () {
                             window.location.reload();
@@ -148,7 +240,6 @@
             ;
 
         }
-
 
 
         $(window).scroll(function () {

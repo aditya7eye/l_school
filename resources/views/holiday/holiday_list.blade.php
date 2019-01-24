@@ -19,7 +19,7 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <table id="order-listing" class="table table-striped w-100">
+                                <table id="example" class="table table-bordered w-100" >
                                     <thead style="background-color: #34BF9B;">
                                     <tr>
                                         <th class="border-bottom-0" style="color:white;">Holiday #</th>

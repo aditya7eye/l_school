@@ -5,66 +5,58 @@
         .mybg {
             padding: 10px 10px;
         }
+
+        ::-webkit-scrollbar-thumb {
+            background: #6e80ce;
+            border-radius: 8px;
+        }
+
+        /* Handle on hover */
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0087b3;
+        }
+
+        .style-scroll::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+            border-width: thin;
+            border-style: solid;
+            border-color: #0087b3;
+            border-image: initial;
+        }
+
+        .style-scroll::-webkit-scrollbar-button {
+            width: 0px;
+            height: 0px;
+            display: none;
+        }
+
+        .style-scroll::-webkit-scrollbar-corner {
+            background-color: transparent;
+        }
+
+        .style-scroll::-webkit-scrollbar-thumb {
+            background-color: #0087b3;
+            box-shadow: rgba(0, 0, 0, 0.1) 1px 1px 0px inset, rgba(0, 0, 0, 0.07) 0px -1px 0px inset;
+        }
+
     </style>
 
     <div class="container-fluid page-body-wrapper" id="maindiv">
         <div class="main-panel">
             <div class="content-wrapper">
-
-
-                {{--<div class="card">--}}
-                {{--<div class="card-body">--}}
-                {{--<h4 class="card-title">Generate Payrole</h4>--}}
-                {{--<hr>--}}
-                {{--<form class="forms-sample" action="{{ url('generate_payrole') }}" method="get">--}}
-                {{--<div>--}}
-                {{--<div class="form-group">--}}
-                {{--<label for="exampleInputName1">Month</label>--}}
-                {{--<select size="1" name="month" class="form-control">--}}
-                {{--<option selected value="01">January</option>--}}
-                {{--<option value="02">February</option>--}}
-                {{--<option value="03">March</option>--}}
-                {{--<option value="04">April</option>--}}
-                {{--<option value="05">May</option>--}}
-                {{--<option value="06">June</option>--}}
-                {{--<option value="07">July</option>--}}
-                {{--<option value="08">August</option>--}}
-                {{--<option value="09">September</option>--}}
-                {{--<option value="10">October</option>--}}
-                {{--<option value="11">November</option>--}}
-                {{--<option value="12">December</option>--}}
-                {{--</select>--}}
-                {{--</div>--}}
-                {{--<div class="form-group">--}}
-                {{--<label for="exampleInputEmail3">Year</label>--}}
-                {{--@php--}}
-                {{--$already_selected_value = 2019;--}}
-                {{--$earliest_year = 2001;--}}
-                {{--print '<select name="year" class="form-control">';--}}
-                {{--foreach (range(date('Y'), $earliest_year) as $x) {--}}
-                {{--print '<option value="'.$x.'"'.($x === $already_selected_value ? ' selected="selected"' : '').'>'.$x.'</option>';--}}
-                {{--}--}}
-                {{--print '</select>';--}}
-                {{--@endphp--}}
-                {{--</div>--}}
-
-                {{--<button type="submit" class="btn btn-warning mr-2">Submit</button>--}}
-                {{--</div>--}}
-                {{--</form>--}}
-                {{--</div>--}}
-                {{--</div>--}}
-                {{--<br>--}}
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">@if(count($payroles)>0)
+                        <h4 class="card-title">
+                            @if(count($payroles)>0)
                                 @php
                                     $array  = explode(",", $date);
                                 @endphp
-                                {{date('F', mktime(0, 0, 0, $array[0], 10)).", ".$array[1]  }} @endif Payroll List <a href="javascript:history.back()" class="pull-right btn btn-xs btn-success">Go
+                                {{date('F', mktime(0, 0, 0, $array[0], 10)).", ".$array[1]  }} @endif Payroll List <a
+                                    href="{{url('create-payroll')}}" class="pull-right btn btn-xs btn-success">Go
                                 Back</a></h4>
                         <hr>
-                        <table class="center-aligned-table table table-responsive table-bordered"
-                               style="height: 500px; overflow: scroll;" id="example">
+                        <table class="table table-responsive style-scroll table-bordered table-sm" id="example">
                             <thead style="background-color: #34BF9B;">
                             <tr>
                                 <th class="border-bottom-0" style="color:white;">Month/Year</th>
@@ -78,7 +70,11 @@
                                 <th class="border-bottom-0" style="color:white;">Late Count</th>
                                 <th class="border-bottom-0" style="color:white;">Late Coming Minute</th>
                                 <th class="border-bottom-0" style="color:white;">Gatepass Minute</th>
+                                <th class="border-bottom-0" style="color:white;">Total Gatepass</th>
                                 <th class="border-bottom-0" style="color:white;">Leave Without Pay</th>
+                                @if($temp == 1)
+                                    <th class="border-bottom-0" style="color:white;">Modified Leave</th>
+                                @endif
                                 <th class="border-bottom-0" style="color:white;">Overtime Minute</th>
                                 <th class="border-bottom-0" style="color:white;">Paid Leave</th>
                                 <th class="border-bottom-0" style="color:white;">Salary</th>
@@ -87,6 +83,9 @@
                                 <th class="border-bottom-0" style="color:white;">Total ESIC</th>
                                 <th class="border-bottom-0" style="color:white;">Total Deduction</th>
                                 <th class="border-bottom-0" style="color:white;">Payout</th>
+                                @if($temp == 1)
+                                    <th class="border-bottom-0" style="color:white;">Action</th>
+                                @endif
 
                             </tr>
                             </thead>
@@ -106,7 +105,11 @@
                                         <td>{{ $payrole->late_count }}</td>
                                         <td>{{ $payrole->late_minute }}</td>
                                         <td>{{ $payrole->gatepassmin }}</td>
+                                        <td>{{ $payrole->total_gatepass }}</td>
                                         <td>{{ $payrole->lwp }}</td>
+                                        @if($temp == 1)
+                                            <td>{{ isset($payrole->modified_lwp) ? $payrole->modified_lwp :'-'}}</td>
+                                        @endif
                                         <td>{{ $payrole->overtime_min }}</td>
                                         <td>{{ $payrole->paid_leave }}</td>
                                         <td>{{ $payrole->salary }}</td>
@@ -115,6 +118,27 @@
                                         <td>{{ $payrole->total_esic }}</td>
                                         <td>{{ $payrole->total_deduction }}</td>
                                         <td>{{ $payrole->payout }}</td>
+                                        @if($temp == 1)
+                                            <td>
+                                                @if($payrole->absent_days > 0)
+                                                    <div class="dropdown btn-sm">
+                                                        <button type="button"
+                                                                class="btn btn-success btn-xs dropdown-toggle"
+                                                                data-toggle="dropdown">
+                                                            Option
+                                                        </button>
+                                                        <div class="dropdown-menu">
+                                                            <a class="dropdown-item" href="#"
+                                                               onclick="update_temp_payroll('{{ $payrole->id }}');">Edit
+                                                                Paid Leave</a>
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <span class="badge badge-danger">No Leave Taken</span>
+                                                @endif
+                                            </td>
+                                        @endif
+
                                         {{--<td>--}}
                                         {{--<button onclick="update_admin({{ $adminlistobj->id }})"--}}
                                         {{--class="btn btn-primary ">Edit--}}
@@ -153,6 +177,19 @@
                 $(headerBottom).removeClass('fixed-top');
             }
         });
+        $(document).ready(function () {
+            $('#payroll_list').DataTable({
+                "scrollX": true
+            });
+        });
+
+        function update_temp_payroll(id) {
+            $('#my').modal('show');
+            $.get('{{ url('edit_temp_payroll') }}', {tid: id}, function (data) {
+                $('#mh').html('Edit Temporary Payroll Leave');
+                $('#mb').html(data);
+            });
+        }
     </script>
     <!-- content-wrapper ends -->
     <!-- partial:partials/_footer.html -->

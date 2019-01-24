@@ -16,7 +16,7 @@
                     <div class="card-body">
                         <h4 class="card-title">Leave Type Count List</h4>
                         <hr>
-                        <table class="center-aligned-table table table-bordered">
+                        <table class="center-aligned-table table table-bordered" id="example">
                             <thead style="background-color: #34BF9B;">
                             <tr>
                                 <th class="border-bottom-0" style="color:white;">#</th>
@@ -38,8 +38,7 @@
                                         <td>{{ $employeelistobj->cl }}</td>
                                         <td>{{ $employeelistobj->ml }}</td>
                                         <td>
-                                            <button onclick="update_leave('{{ $employeelistobj->id }}');"
-                                                    class="btn btn-primary ">Edit
+                                            <button onclick="update_leave('{{ $employeelistobj->id }}');" type="button" class="btn btn-success ">Edit
                                             </button>
                                         </td>
                                     </tr>

@@ -1,4 +1,4 @@
-<script src="{{ url('assets/js/validate.js') }}"></script>
+<script src="{{ url('js/validate.js') }}"></script>
 
 <form class="forms-sample" action="{{ url('update_leave_count') }}" method="get">
     <div class="form-group">

@@ -97,6 +97,51 @@
         .errorClass {
             border: 1px solid red !important;
         }
+        .dropdown-item {
+            font-size: 12px;
+            padding: 5px 0px;
+            text-align: center;
+            border-bottom: 1px solid #c8c8c8;
+            z-index: 999;
+
+        }
+
+        .dropdown-menu {
+            padding: 0px;
+            z-index: 999;
+        }
+        a.disabled {
+            pointer-events: none;
+            cursor: default;
+        }
+        #example > thead > tr > th
+        {
+            font-weight:600 !important;
+            font-size:12px !important;
+            padding:10px !important;
+            text-align: center;
+        }
+        #example > tbody > tr > td
+        {
+            padding:2px !important;
+            font-weight:600 !important;
+            font-size: 12px !important;
+            text-align: center;
+        }
+        #example1 > thead > tr > th
+        {
+            font-weight:600 !important;
+            font-size:12px !important;
+            padding:10px !important;
+            text-align: center;
+        }
+        #example1 > tbody > tr > td
+        {
+            padding:2px !important;
+            font-weight:600 !important;
+            font-size: 12px !important;
+            text-align: center;
+        }
 
     </style>
 </head>
@@ -447,7 +492,12 @@
         });
     }
     $(document).ready(function () {
-        $('#example').DataTable();
+        $('#example').DataTable({
+            "pageLength": 25,
+        });
+        $('#example1').DataTable({
+            "pageLength": 25,
+        });
         $('[data-toggle="tooltip"]').tooltip();
     });
 </script>

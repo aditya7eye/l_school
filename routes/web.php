@@ -59,8 +59,15 @@ Route::group(['middleware' => 'usersession'], function () {
     Route::get('getAttendance','AttendanceController@attendance_list');
     Route::get('create-payroll','PayrollController@create_payrole');
     Route::get('generate_payroll','PayrollController@generate_payrole');
-    Route::get('delete_payroll','PayrollController@delete_payroll');
+    Route::get('delete_payroll_temp','PayrollController@delete_payroll_temp');
     Route::get('view-payroll/{date}','PayrollController@payrole_list');
+    Route::get('view-temp-payroll/{date}','PayrollController@temp_payrole_list');
+
+    Route::get('edit_temp_payroll','PayrollController@edit_temp_payroll');
+    Route::get('update_temp_payroll','PayrollController@update_temp_payroll');
+
+
+    Route::get('convert_payroll/{tempid_date}','PayrollController@convert_payroll');
 
     Route::get('update_pf_form','Master_Controller@update_pf_form');
     Route::get('update_pf_list','Master_Controller@update_pf_list');

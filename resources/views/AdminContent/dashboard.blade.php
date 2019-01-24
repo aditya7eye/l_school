@@ -92,7 +92,7 @@
                                 @endphp
                                 <h4 class="card-title">Recent Payroll List <a href="{{url('create-payroll')}}" class="btn btn-xs btn-primary pull-right">View All</a></h4>
                                 <hr>
-                                <table class=" table table-bordered">
+                                <table class=" table table-bordered" id="example">
                                     <thead style="background-color: #34BF9B;">
                                     <tr>
                                         <th class="border-bottom-0" style="color:white;">Month</th>
@@ -146,7 +146,7 @@
                                     @php
                                         $holidays = \App\Holiday::where(['is_active' => 1])->get();
                                     @endphp
-                                    <table class=" table table-bordered">
+                                    <table class=" table table-bordered" id="example1">
                                         <thead style="background-color: #34BF9B;">
                                         <tr>
                                             <th class="border-bottom-0" style="color:white;">Holiday #</th>

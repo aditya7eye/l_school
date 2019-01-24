@@ -59,6 +59,20 @@ class LoginController extends Controller
 //            $emp->ml = 7;
 //            $emp->save();
 //        }
+
+        $fullday = 0;
+        $halfday = 0;
+        $minCal = 1029;
+        while ($minCal > 179) {
+            if ($minCal > 360) {
+                $minCal = $minCal - 360;
+                $fullday++;
+            } elseif ($minCal > 180) {
+                $minCal = $minCal - 180;
+                $halfday++;
+            }
+        }
+        echo $fullday+($halfday/2);
     }
 
 }
