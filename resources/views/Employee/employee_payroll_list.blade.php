@@ -40,6 +40,21 @@
             box-shadow: rgba(0, 0, 0, 0.1) 1px 1px 0px inset, rgba(0, 0, 0, 0.07) 0px -1px 0px inset;
         }
 
+        #exampleView > thead > tr > th
+        {
+            font-weight:600 !important;
+            font-size:12px !important;
+            padding:10px !important;
+            text-align: center;
+        }
+        #exampleView > tbody > tr > td
+        {
+            padding:2px !important;
+            font-weight:600 !important;
+            font-size: 12px !important;
+            text-align: center;
+        }
+
     </style>
 
     <div class="container-fluid page-body-wrapper" id="maindiv">
@@ -56,7 +71,7 @@
                                     href="{{url('create-payroll')}}" class="pull-right btn btn-xs btn-success">Go
                                 Back</a></h4>
                         <hr>
-                        <table class="table table-responsive style-scroll table-bordered table-sm" id="example">
+                        <table class="table table-responsive style-scroll table-bordered table-sm" id="exampleView">
                             <thead style="background-color: #34BF9B;">
                             <tr>
                                 <th class="border-bottom-0" style="color:white;">Month/Year</th>
@@ -69,6 +84,7 @@
                                 <th class="border-bottom-0" style="color:white;">Absent Days</th>
                                 <th class="border-bottom-0" style="color:white;">Late Count</th>
                                 <th class="border-bottom-0" style="color:white;">Late Coming Minute</th>
+                                <th class="border-bottom-0" style="color:white;">Pre. Gatepass Minute</th>
                                 <th class="border-bottom-0" style="color:white;">Gatepass Minute</th>
                                 <th class="border-bottom-0" style="color:white;">Total Gatepass</th>
                                 <th class="border-bottom-0" style="color:white;">Leave Without Pay</th>
@@ -104,6 +120,7 @@
                                         <td>{{ $payrole->absent_days }}</td>
                                         <td>{{ $payrole->late_count }}</td>
                                         <td>{{ $payrole->late_minute }}</td>
+                                        <td>{{ $payrole->previous_gatepassmin }}</td>
                                         <td>{{ $payrole->gatepassmin }}</td>
                                         <td>{{ $payrole->total_gatepass }}</td>
                                         <td>{{ $payrole->lwp }}</td>
@@ -167,8 +184,23 @@
         </div>
     </div>
 
-
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
     <script>
+        $('#exampleView').DataTable({
+            "pageLength": 25,
+            dom: 'Bfrtip',
+            buttons: [
+//                'copyHtml5',
+                'excelHtml5',
+                'csvHtml5',
+//                'pdfHtml5'
+            ]
+        });
         $(window).scroll(function () {
             var headerBottom = '.navbar.horizontal-layout .nav-bottom';
             if ($(window).scrollTop() >= 70) {

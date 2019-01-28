@@ -20,7 +20,23 @@
                         <hr>
                         <form class="forms-sample" action="{{ url('generate_payroll') }}" method="get">
                             <div class="row">
-                                <div class="col-sm-4">
+                                <div class="col-sm-3">
+
+                                    <div class="form-group">
+                                        @php
+                                            $employeelist = \App\EmployeeModel::where(['is_active'=>1])->get();
+                                        @endphp
+                                        <label for="exampleInputEmail3">Employee List</label>
+                                        <select size="1" name="employee_id[]" class="form-control typeDD"
+                                                style="width: 100%;" multiple>
+                                            <option selected value="0">ALL</option>
+                                            @foreach($employeelist as $employee)
+                                                <option value="{{$employee->EmployeeId}}">{{$employee->EmployeeName}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
                                     <div class="form-group">
                                         <label for="exampleInputName1">Month</label>
                                         <select size="1" name="month" class="form-control">
@@ -39,7 +55,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-sm-4">
+                                <div class="col-sm-3">
 
                                     <div class="form-group">
                                         <label for="exampleInputEmail3">Year</label>
@@ -54,7 +70,7 @@
                                         @endphp
                                     </div>
                                 </div>
-                                <div class="col-sm-4">
+                                <div class="col-sm-3">
                                     <label for="exampleInputEmail3"></label><br>
                                     <button type="submit" class="btn btn-warning mr-2">Submit</button>
                                 </div>
@@ -197,7 +213,7 @@
                                 @endforeach
                             @else
                                 <tr>
-                                    <td align="center" colspan="5">No Record Found</td>
+                                    <td align="center" colspan="8"> < No Record Found ></td>
                                 </tr>
                             @endif
                             </tbody>
@@ -225,7 +241,7 @@
                 closeOnCancel: false,
                 buttons: true,
                 dangerMode: true,
-            }).then((willDelete) = > {
+            }).then((willDelete) => {
                 if (willDelete) {
                     $.get('{{ url('delete_payroll_temp') }}', {date: e_id}, function (data) {
                         success_noti("Payroll has been deleted");

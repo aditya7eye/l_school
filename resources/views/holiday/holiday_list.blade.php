@@ -14,7 +14,7 @@
                             <div class="card-header header-sm">
 
                                 <div class="d-flex align-items-center">
-                                    <button onclick="create_holiday()" class="btn btn-primary">Create Holiday</button>
+                                    <a href="{{url('holiday/create')}}" class="btn btn-primary">Create Holiday</a>
                                     &nbsp;&nbsp;
                                 </div>
                             </div>
@@ -39,8 +39,7 @@
 
                                             <td>{{$holiday->occasion}}</td>
                                             <td>
-                                                <a onclick="edit_holiday('{{$holiday->id}}')"
-                                                   class="btn btn-outline-primary">Edit</a>
+                                                <a href="{{url('holiday_edit?holiday_id=').$holiday->id}}" {{--onclick="edit_holiday('{{$holiday->id}}')"--}} class="btn btn-outline-primary">Edit</a>
                                                 <a onclick="delete_holiday('{{$holiday->id}}')"
                                                    class="btn btn-outline-danger">Delete</a>
                                             </td>
@@ -60,14 +59,14 @@
     </div>
 
     <script type="text/javascript">
-        function edit_holiday(holiday_id) {
-            $('#my').modal('show');
-            $.get('{{ url('holiday_edit') }}', {holiday_id: holiday_id}, function (data) {
-                $('#mh').html('Edit Holiday');
-                $('#mb').html(data);
+        {{--function edit_holiday(holiday_id) {--}}
+            {{--$('#my').modal('show');--}}
+            {{--$.get('{{ url('holiday_edit') }}', {holiday_id: holiday_id}, function (data) {--}}
+                {{--$('#mh').html('Edit Holiday');--}}
+                {{--$('#mb').html(data);--}}
 
-            });
-        }
+            {{--});--}}
+        {{--}--}}
 
         function delete_holiday(holiday_id) {
             swal({

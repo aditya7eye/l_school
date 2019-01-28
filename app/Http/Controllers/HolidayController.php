@@ -35,6 +35,19 @@ class HolidayController extends Controller
     {
         $color = new Holiday();
         $color->date = Carbon::parse(request('date'))->format('Y-m-d');
+//        $color->employee_id = request('employee_id');
+        if (request('employee_id') != '0') {
+            $project_ids = request('employee_id');
+            $cnt = 1;
+            foreach ($project_ids as $pid) {
+                if ($cnt == 1) {
+                    $color->employee_id = $pid;
+                } else {
+                    $color->employee_id .= ',' . $pid;
+                }
+                $cnt++;
+            }
+        }
         $color->occasion = request('occasion');
         $color->save();
         return Redirect::back()->with('message', 'Holiday has been added');
@@ -75,6 +88,18 @@ class HolidayController extends Controller
         $holiday = Holiday::find(request('cid'));
         $holiday->date = Carbon::parse(request('date'))->format('Y-m-d');
         $holiday->occasion = request('occasion');
+        if (request('employee_id') != null) {
+            $project_ids = request('employee_id');
+            $cnt = 1;
+            foreach ($project_ids as $pid) {
+                if ($cnt == 1) {
+                    $holiday->employee_id = $pid;
+                } else {
+                    $holiday->employee_id .= ',' . $pid;
+                }
+                $cnt++;
+            }
+        }
         $holiday->save();
         return Redirect::back()->with('message', 'Holiday has been updated');
     }

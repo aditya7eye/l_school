@@ -21,6 +21,9 @@
 
     <link rel="stylesheet" href="{{ url('css/datepicker.css') }}">
 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
     {{-------Notification--------}}
     <link rel="stylesheet" href="{{ url('css/lobibox.min.css') }}">
     <script src="{{url('js/notification.min.js')}}"></script>
@@ -97,6 +100,7 @@
         .errorClass {
             border: 1px solid red !important;
         }
+
         .dropdown-item {
             font-size: 12px;
             padding: 5px 0px;
@@ -110,35 +114,36 @@
             padding: 0px;
             z-index: 999;
         }
+
         a.disabled {
             pointer-events: none;
             cursor: default;
         }
-        #example > thead > tr > th
-        {
-            font-weight:600 !important;
-            font-size:12px !important;
-            padding:10px !important;
+
+        #example > thead > tr > th {
+            font-weight: 600 !important;
+            font-size: 12px !important;
+            padding: 10px !important;
             text-align: center;
         }
-        #example > tbody > tr > td
-        {
-            padding:2px !important;
-            font-weight:600 !important;
+
+        #example > tbody > tr > td {
+            padding: 2px !important;
+            font-weight: 600 !important;
             font-size: 12px !important;
             text-align: center;
         }
-        #example1 > thead > tr > th
-        {
-            font-weight:600 !important;
-            font-size:12px !important;
-            padding:10px !important;
+
+        #example1 > thead > tr > th {
+            font-weight: 600 !important;
+            font-size: 12px !important;
+            padding: 10px !important;
             text-align: center;
         }
-        #example1 > tbody > tr > td
-        {
-            padding:2px !important;
-            font-weight:600 !important;
+
+        #example1 > tbody > tr > td {
+            padding: 2px !important;
+            font-weight: 600 !important;
             font-size: 12px !important;
             text-align: center;
         }
@@ -322,7 +327,8 @@
                                     class="menu-arrow"></i></a>
                         <div class="submenu">
                             <ul class="submenu-item">
-                                <li class="nav-item"><a class="nav-link" href="{{url('employee-manage')}}">Manage Employee</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{{url('employee-manage')}}">Manage
+                                        Employee</a></li>
                                 <li class="nav-item"><a class="nav-link" href="{{url('employee-leave-left')}}">Employee
                                         Leave Left</a></li>
                                 <li class="nav-item"><a class="nav-link" href="{{url('attendance_list')}}">Attendance
@@ -492,6 +498,8 @@
         });
     }
     $(document).ready(function () {
+        $('.typeDD').select2();
+
         $('#example').DataTable({
             "pageLength": 25,
         });
