@@ -40,17 +40,16 @@
             box-shadow: rgba(0, 0, 0, 0.1) 1px 1px 0px inset, rgba(0, 0, 0, 0.07) 0px -1px 0px inset;
         }
 
-        #exampleView > thead > tr > th
-        {
-            font-weight:600 !important;
-            font-size:12px !important;
-            padding:10px !important;
+        #exampleView > thead > tr > th {
+            font-weight: 600 !important;
+            font-size: 12px !important;
+            padding: 10px !important;
             text-align: center;
         }
-        #exampleView > tbody > tr > td
-        {
-            padding:2px !important;
-            font-weight:600 !important;
+
+        #exampleView > tbody > tr > td {
+            padding: 2px !important;
+            font-weight: 600 !important;
             font-size: 12px !important;
             text-align: center;
         }
@@ -71,9 +70,11 @@
                                     href="{{url('create-payroll')}}" class="pull-right btn btn-xs btn-success">Go
                                 Back</a></h4>
                         <hr>
-                        <table class="table table-responsive style-scroll table-bordered table-sm" id="exampleView">
+                        <table class="table table-responsive style-scroll table-bordered table-sm"
+                               id="exampleView">
                             <thead style="background-color: #34BF9B;">
                             <tr>
+                                {{--<th class="border-bottom-0" style="color:white;">ID</th>--}}
                                 <th class="border-bottom-0" style="color:white;">Month/Year</th>
                                 <th class="border-bottom-0" style="color:white;">Employee Name</th>
                                 <th class="border-bottom-0" style="color:white;">Month Days</th>
@@ -110,6 +111,7 @@
                             @if(count($payroles) > 0)
                                 @foreach ($payroles as $index => $payrole)
                                     <tr>
+{{--                                        <td>{{ $payrole->employee_id }}</td>--}}
                                         <td>{{ $payrole->date }}</td>
                                         <td>{{ $payrole->employee->EmployeeName }}</td>
                                         <td>{{ $payrole->month_days }}</td>

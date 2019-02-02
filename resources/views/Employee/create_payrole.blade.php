@@ -72,7 +72,8 @@
                                 </div>
                                 <div class="col-sm-3">
                                     <label for="exampleInputEmail3"></label><br>
-                                    <button type="submit" class="btn btn-warning mr-2">Submit</button>
+                                    <button type="submit" onclick="blockPage();" class="btn btn-warning mr-2">Submit
+                                    </button>
                                 </div>
                             </div>
                         </form>
@@ -135,13 +136,14 @@
                                                        href="{{url('view-temp-payroll').'/'.base64_encode($payrole->date)}}">View
                                                         Temp Payrolls</a>
                                                     <a class="dropdown-item"
-                                                       href="{{url('delete_payroll_temp?date=').$payrole->date}}">Delete
-                                                        Temp Payroll</a>
-                                                    @if($payrole->payrole_generated == $modified_count)
-                                                        <a class="dropdown-item"
-                                                           href="{{url('convert_payroll').'/'.base64_encode($payrole->date)}}" {{--onclick="del_payroll('{{$payrole->date}}')"--}} >Mark
-                                                            as locked</a>
-                                                    @endif
+                                                       {{-- href="{{url('delete_payroll_temp?date=').$payrole->date}}"--}} onclick="del_payroll('{{$payrole->date}}');"
+                                                       href="#">Delete Temp Payroll</a>
+                                                    {{--                                                    @if($payrole->payrole_generated == $modified_count)--}}
+                                                    <a class="dropdown-item"
+                                                       onclick="convert_payroll('{{base64_encode($payrole->date)}}')"
+                                                       href="{{--{{url('convert_payroll').'/'.base64_encode($payrole->date)}}--}}#">Mark
+                                                        as locked</a>
+                                                    {{--@endif--}}
                                                 </div>
                                             </div>
 
@@ -230,21 +232,40 @@
     <script>
 
         function del_payroll(e_id) {
+            {{--swal({--}}
+                {{--title: "Are you sure?",--}}
+                {{--text: "Once deleted, you will not be able to recover",--}}
+                {{--icon: "warning",--}}
+                {{--showCancelButton: true,--}}
+                {{--confirmButtonClass: "btn-danger",--}}
+                {{--cancelButtonText: "No, cancel plx!",--}}
+                {{--closeOnConfirm: false,--}}
+                {{--closeOnCancel: false,--}}
+                {{--buttons: true,--}}
+                {{--dangerMode: true,--}}
+            {{--}).then((willDelete) => {--}}
+                {{--if (willDelete) {--}}
+                    {{--$.get('{{ url('delete_payroll_temp') }}', {date: e_id}, function (data) {--}}
+                        {{--success_noti("Payroll has been deleted");--}}
+                        {{--setTimeout(function () {--}}
+                            {{--window.location.reload();--}}
+                        {{--}, 1000);--}}
+                    {{--});--}}
+
+                {{--}--}}
+            {{--}--}}
+        {{--)--}}
+            {{--;--}}
             swal({
                 title: "Are you sure?",
-                text: "Once deleted, you will not be able to recover",
+                text: "Once deleted, you will not be able to recover this imaginary file!",
                 icon: "warning",
-                showCancelButton: true,
-                confirmButtonClass: "btn-danger",
-                cancelButtonText: "No, cancel plx!",
-                closeOnConfirm: false,
-                closeOnCancel: false,
                 buttons: true,
                 dangerMode: true,
             }).then((willDelete) => {
                 if (willDelete) {
                     $.get('{{ url('delete_payroll_temp') }}', {date: e_id}, function (data) {
-                        success_noti("Payroll has been deleted");
+                        success_noti("Temp Payroll has been deleted");
                         setTimeout(function () {
                             window.location.reload();
                         }, 1000);
@@ -252,11 +273,34 @@
 
                 }
             }
+        );
+
+        }
+
+        function convert_payroll(e_id) {
+            swal({
+                title: "Are you sure?",
+                text: "you want to generate payroll",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            }).then((willDelete) => {
+                if (willDelete) {
+                    window.location.href = '{{url('convert_payroll').'/'}}' + e_id;
+                    blockPage();
+                {{--$.get('{{ url('convert_payroll') }}', {date: e_id}, function (data) {--}}
+                    {{--success_noti("Payroll has been generated");--}}
+                    {{--setTimeout(function () {--}}
+                    {{--window.location.reload();--}}
+                    {{--}, 1000);--}}
+                    {{--});--}}
+
+                }
+            }
         )
             ;
 
         }
-
 
         $(window).scroll(function () {
             var headerBottom = '.navbar.horizontal-layout .nav-bottom';

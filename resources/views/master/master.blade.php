@@ -16,7 +16,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.33.1/dist/sweetalert2.all.min.js"></script>
+    {{--<script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.33.1/dist/sweetalert2.all.min.js"></script>--}}
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <link rel="stylesheet" href="{{ url('css/datepicker.css') }}">
@@ -148,10 +150,38 @@
             text-align: center;
         }
 
+        .hideAll {
+            text-align: center
+        }
+
+        #hideAll,
+        .hideAll {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background-color: #fff;
+            z-index: 99
+        }
+
+        .hideAll {
+            margin: auto;
+            height: 100%;
+            width: 100%;
+            vertical-align: middle;
+            display: table-cell;
+            opacity: .4;
+            filter: alpha(opacity=40)
+        }
+
     </style>
 </head>
 
 <body>
+<div class="hideAll" style="display: block;">
+    <img src="{{url('loader.svg')}}" style="position:fixed;top: 35%;right: 45%; z-index: 999">
+</div>
 <div class="container-scroller">
     <!-- partial:partials/_horizontal-navbar.html -->
     <nav class="navbar horizontal-layout col-lg-12 col-12 p-0">
@@ -431,7 +461,7 @@
 <!-- page-body-wrapper ends -->
     <footer class="footer">
         <div class="container-fluid clearfix">
-            <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © 2018 <a
+            <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © 2019 <a
                         href="http://7eyeitsolutions.com/"
                         target="_blank">7eyeitsolutions</a>. All rights reserved.</span>
         </div>
@@ -471,6 +501,20 @@
 <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
 <script type="text/javascript">
+    $(document).ready(function () {
+        blockPage();
+        unblockPage();
+    });
+    function blockPage() {
+        //console.log("Page Blocking Is On");
+        $(".hideAll").css("display", "block");
+    }
+
+    function unblockPage() {
+        //console.log("Page Blocking Is Off");
+        $(".hideAll").css("display", "none");
+    }
+
     $('.dtp').datepicker({
         format: "dd-M-yyyy",
         maxViewMode: 2,

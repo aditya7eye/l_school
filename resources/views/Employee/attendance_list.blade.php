@@ -114,7 +114,7 @@
 
                                     <div class="form-group">
                                         @php
-                                            $employeelist = \App\EmployeeModel::where(['RecordStatus'=>1])->get();
+                                            $employeelist = \App\EmployeeModel::where(['is_active'=>1])->get();
                                         @endphp
                                         <label for="exampleInputEmail3">Employee List</label>
                                         <select size="1" name="employee_id" class="form-control">

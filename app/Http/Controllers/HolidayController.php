@@ -36,7 +36,8 @@ class HolidayController extends Controller
         $color = new Holiday();
         $color->date = Carbon::parse(request('date'))->format('Y-m-d');
 //        $color->employee_id = request('employee_id');
-        if (request('employee_id') != '0') {
+        $employee = request('employee_id');
+        if ($employee[0] != '0') {
             $project_ids = request('employee_id');
             $cnt = 1;
             foreach ($project_ids as $pid) {
@@ -88,9 +89,12 @@ class HolidayController extends Controller
         $holiday = Holiday::find(request('cid'));
         $holiday->date = Carbon::parse(request('date'))->format('Y-m-d');
         $holiday->occasion = request('occasion');
-        if (request('employee_id') != null) {
+        $employee = request('employee_id');
+        if ($employee[0] != '0') {
             $project_ids = request('employee_id');
             $cnt = 1;
+            $holiday->employee_id = null;
+            $holiday->save();
             foreach ($project_ids as $pid) {
                 if ($cnt == 1) {
                     $holiday->employee_id = $pid;

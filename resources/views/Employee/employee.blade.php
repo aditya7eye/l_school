@@ -19,6 +19,7 @@
                             <tr>
                                 <th class="border-bottom-0" style="color:white;">#</th>
                                 <th class="border-bottom-0" style="color:white;">EmployeeName</th>
+                                <th class="border-bottom-0" style="color:white;">EmployeeCode</th>
                                 <th class="border-bottom-0" style="color:white;">Date Of Joining</th>
                                 <th class="border-bottom-0" style="color:white;">Salary</th>
                                 <th class="border-bottom-0" style="color:white;">Designation</th>
@@ -33,6 +34,7 @@
                                     <tr>
                                         <td>{{ $index+1 }}</td>
                                         <td>{{ ucwords($employeelistobj->EmployeeName) }}</td>
+                                        <td>{{ $employeelistobj->EmployeeCode }}</td>
                                         <td>{{ date_format(date_create($employeelistobj->DOJ), "d-M-Y")}}</td>
                                         <td>{{ $employeelistobj->salary }}</td>
                                         <td>{{ isset($employeelistobj->emp_type->type)?$employeelistobj->emp_type->type :'-'}}</td>

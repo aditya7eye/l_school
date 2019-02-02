@@ -50,29 +50,32 @@ class LoginController extends Controller
 
     public function test1(Request $request)
     {
-//        $empl = EmployeeModel::where(['is_active' => 1])->get();
-//        foreach ($empl as $emp11) {
-//            $emp = new EmployeeLeaveLeft();
-//            $emp->session_id = 1;
-//            $emp->employee_id = $emp11->EmployeeId;
-//            $emp->cl = 12;
-//            $emp->ml = 7;
-//            $emp->save();
-//        }
-
-        $fullday = 0;
-        $halfday = 0;
-        $minCal = 1609;
-        while ($minCal > 179) {
-            if ($minCal > 360) {
-                $minCal = $minCal - 360;
-                $fullday++;
-            } elseif ($minCal > 180) {
-                $minCal = $minCal - 180;
-                $halfday++;
+        $empl = EmployeeModel::where(['is_active' => 1])->get();
+        foreach ($empl as $emp11) {
+            $el = EmployeeLeaveLeft::where(['employee_id' => $emp11->EmployeeId])->first();
+            if (!isset($el)){
+                $emp = new EmployeeLeaveLeft();
+                $emp->session_id = 1;
+                $emp->employee_id = $emp11->EmployeeId;
+                $emp->cl = 12;
+                $emp->ml = 7;
+                $emp->save();
             }
         }
-        echo $minCal;
+
+//        $fullday = 0;
+//        $halfday = 0;
+//        $minCal = 1609;
+//        while ($minCal > 179) {
+//            if ($minCal > 360) {
+//                $minCal = $minCal - 360;
+//                $fullday++;
+//            } elseif ($minCal > 180) {
+//                $minCal = $minCal - 180;
+//                $halfday++;
+//            }
+//        }
+//        echo $minCal;
     }
 
 }

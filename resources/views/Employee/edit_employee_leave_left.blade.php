@@ -7,11 +7,11 @@
     </div>
     <div class="form-group">
         <label for="exampleInputEmail3">CL</label>
-        <input type="text" maxlength="2" class="form-control required numberOnly" name="cl" value="{{ $employee_leave_left->cl }}" id="cl" />
+        <input type="text" maxlength="5" class="form-control required amount" name="cl" value="{{ $employee_leave_left->cl }}" id="cl" />
     </div>
     <div class="form-group">
         <label for="exampleInputEmail3">ML</label>
-        <input type="text" maxlength="2" class="form-control required numberOnly" name="ml" value="{{ $employee_leave_left->ml }}" id="ml"
+        <input type="text" maxlength="5" class="form-control required amount" name="ml" value="{{ $employee_leave_left->ml }}" id="ml"
                placeholder="ML">
     </div>
     <div class="form-group">

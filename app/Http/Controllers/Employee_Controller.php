@@ -29,6 +29,7 @@ class Employee_Controller extends Controller
     {
         $admin = EmployeeModel::find(request('eid'));
         $admin->EmployeeName = request('EmployeeName');
+        $admin->EmployeeCode = request('EmployeeCode');
         $admin->EmployementType = request('EmployementType');
         $admin->employee_type_id = request('employee_type_id');
         $admin->DOJ = Carbon::parse(request('doj'))->format('Y-m-d');
