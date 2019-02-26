@@ -21,4 +21,16 @@ class AttendanceController extends Controller
         return view('employee.attendance_list')->with(['attendance' => $attendance, 'year' => $year, 'month' => $month, 'employee_id' => $employee_id]);
 
     }
+
+    public function view_attendance_log(Request $request)
+    {
+//        return $data = $request->session()->get('adminmaster');
+//        $attendance_list = Attendancelogs::where(['is_active' => 1])->get();
+        $attDate = $request->input('att_date');
+        $empcode = $request->input('emp_code');
+        $table = $request->input('table');
+        $devicelogs = DB::select("SELECT * FROM $table WHERE UserId = '$empcode' and LogDate like '%$attDate%' order by DeviceLogId ASC");
+        return view('employee.attendance_log_list')->with(['devicelogs' => $devicelogs]);
+
+    }
 }

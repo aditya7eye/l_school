@@ -26,6 +26,13 @@
                                     </div>
 
                                     <div class="form-group">
+                                        <label for="exampleInputName1">Employee Code</label>
+                                        <input type="text" maxlength="25" class="form-control" id="emp_type"
+                                               value="{{ $emp->EmployeeCode }}"
+                                               name="EmployeeCode" placeholder="Employee Name">
+                                    </div>
+
+                                    <div class="form-group">
                                         <label for="exampleInputName1">Date of Joining</label>
                                         <input type="text" maxlength="25" class="form-control dtp required"
                                                id="emp_type"

@@ -57,6 +57,7 @@ Route::group(['middleware' => 'usersession'], function () {
 
     Route::get('attendance_list','AttendanceController@attendance_list');
     Route::get('getAttendance','AttendanceController@attendance_list');
+    Route::get('view_attendance_log','AttendanceController@view_attendance_log');
     Route::get('create-payroll','PayrollController@create_payrole');
     Route::get('generate_payroll','PayrollController@generate_payrole');
     Route::get('delete_payroll_temp','PayrollController@delete_payroll_temp');
