@@ -148,7 +148,7 @@
                             </div>
 
                             <div class="wrapper mt-5 text-gray">
-                                <p class="footer-text">Copyright © 2018 7eyeitsolution. All rights reserved.</p>
+                                <p class="footer-text">Copyright © 2019 7eyeitsolution. All rights reserved.</p>
                                 {{--
                                 <ul class="auth-footer text-gray">
                                     <li><a href="#">Terms & Conditions</a></li>

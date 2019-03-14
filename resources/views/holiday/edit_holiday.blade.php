@@ -1,5 +1,5 @@
 @extends('master.master')
-@section('title','7 EYE E-Commerce | Holiday Edit')
+@section('title','LKS Payroll | Holiday Edit')
 @section('content')
     <!-- partial -->
     <div class="container-fluid page-body-wrapper">
@@ -49,7 +49,7 @@
                                     <div class="col-sm-12">
                                         <div class="form-group">
                                             <label for="username">Date</label>
-                                            <input type="text" class="form-control dtp required" id="datepicker"
+                                            <input type="text" class="form-control hdtp required" id="datepicker"
                                                    name="date"
                                                    autocomplete="off" placeholder="Date"
                                                    value="{{ date_format(date_create($holiday->date), "d-M-Y")}}"
@@ -64,6 +64,11 @@
                                                    name="occasion"
                                                    autocomplete="off" placeholder="Occasion"
                                                    value="{{$holiday->occasion}}"
+                                                   maxlength="50">
+                                            <input type="hidden" class="form-control required" id=""
+                                                   name="cid"
+                                                   autocomplete="off" placeholder="Occasion"
+                                                   value="{{$holiday->id}}"
                                                    maxlength="50">
                                         </div>
                                     </div>
@@ -80,13 +85,4 @@
             </div>
         </div>
     </div>
-    <script>
-        $('.dtp').datepicker({
-            format: "dd-M-yyyy",
-            maxViewMode: 2,
-            // endDate: '-18y',
-            daysOfWeekHighlighted: "0",
-            autoclose: true
-        });
-    </script>
 @stop

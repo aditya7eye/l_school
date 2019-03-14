@@ -102,11 +102,15 @@
                             @if(count($temp_payroles) > 0)
                                 @foreach ($temp_payroles as $index => $payrole)
                                     @php
-                                        $array  = explode(",", $payrole->date);
-                                    $total_pf = \App\TempPayrole::where(['date'=>$payrole->date])->sum('total_pf');
-                                    $total_esic = \App\TempPayrole::where(['date'=>$payrole->date])->sum('total_esic');
-                                    $total_payout = \App\TempPayrole::where(['date'=>$payrole->date])->sum('payout');
-                                    $modified_count = \App\TempPayrole::where(['date'=>$payrole->date,'is_modified'=>1])->count();
+
+                                            $array  = explode(",", $payrole->date);
+                                        $total_pf = \App\TempPayrole::where(['date'=>$payrole->date])->sum('total_pf');
+                                        $total_esic = \App\TempPayrole::where(['date'=>$payrole->date])->sum('total_esic');
+                                        $total_payout = \App\TempPayrole::where(['date'=>$payrole->date])->sum('payout');
+                                        $modified_count = \App\TempPayrole::where(['date'=>$payrole->date,'is_modified'=>1])->count();
+                                        $total_payout = number_format("$total_payout",2,".",",");
+                                        $total_pf = number_format("$total_pf",2,".",",");
+                                        $total_esic = number_format("$total_esic",2,".",",");
 
                                     @endphp
                                     <tr>
@@ -263,17 +267,17 @@
                 buttons: true,
                 dangerMode: true,
             }).then((willDelete) => {
-                if (willDelete) {
-                    $.get('{{ url('delete_payroll_temp') }}', {date: e_id}, function (data) {
-                        success_noti("Temp Payroll has been deleted");
-                        setTimeout(function () {
-                            window.location.reload();
-                        }, 1000);
-                    });
+                        if (willDelete) {
+                            $.get('{{ url('delete_payroll_temp') }}', {date: e_id}, function (data) {
+                                success_noti("Temp Payroll has been deleted");
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 1000);
+                            });
 
-                }
-            }
-        );
+                        }
+                    }
+            );
 
         }
 
@@ -285,19 +289,19 @@
                 buttons: true,
                 dangerMode: true,
             }).then((willDelete) => {
-                if (willDelete) {
-                    window.location.href = '{{url('convert_payroll').'/'}}' + e_id;
-                    blockPage();
-                {{--$.get('{{ url('convert_payroll') }}', {date: e_id}, function (data) {--}}
-                    {{--success_noti("Payroll has been generated");--}}
-                    {{--setTimeout(function () {--}}
-                    {{--window.location.reload();--}}
-                    {{--}, 1000);--}}
-                    {{--});--}}
+                        if (willDelete) {
+                            window.location.href = '{{url('convert_payroll').'/'}}' + e_id;
+                            blockPage();
+                            {{--$.get('{{ url('convert_payroll') }}', {date: e_id}, function (data) {--}}
+                            {{--success_noti("Payroll has been generated");--}}
+                            {{--setTimeout(function () {--}}
+                            {{--window.location.reload();--}}
+                            {{--}, 1000);--}}
+                            {{--});--}}
 
-                }
-            }
-        )
+                        }
+                    }
+            )
             ;
 
         }

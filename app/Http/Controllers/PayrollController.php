@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Attendancelogs;
 use App\EmployeeLeaveLeft;
 use App\EmployeeLeaves;
 use App\EmployeeModel;
@@ -218,41 +219,131 @@ class PayrollController extends Controller
                                 $holiday_present_check = DB::selectOne("SELECT * FROM `holiday` WHERE date = '$att_date' and FIND_IN_SET('$employee->EmployeeId',employee_id) and is_active = 1");//2;
                                 //
                                 $table = "devicelogs_" . $month . "_" . $year;
+                                $device_logs_ = DB::select("SELECT * FROM $table WHERE UserId = $employee->EmployeeCode and LogDate like '%$att_date%' ORDER by LogDate ASC");//2;
                                 $device_logs_count = DB::selectOne("SELECT COUNT(DeviceLogId) as deviceCount FROM $table WHERE UserId = $employee->EmployeeCode and LogDate like '%$att_date%'");//2;
-                                $device_logs = DB::select("SELECT * FROM $table WHERE UserId = $employee->EmployeeCode and LogDate like '%$att_date%'");//2;
                                 if ($device_logs_count->deviceCount % 2 != 0) {
-                                    $now = Carbon::now();
-                                    DB::select("INSERT INTO $table(`DownloadDate`, `DeviceId`, `UserId`, `LogDate`,`C1`) VALUES ('$now',16,$employee->EmployeeCode,'$couttime','out')");
-                                    DB::select("UPDATE `attendancelogs` SET OutTime = '$couttime' WHERE AttendanceDate like '%$att_date%'");
-                                }
-                                foreach ($device_logs as $index => $device_log) {
-                                    if ($index % 2 != 0) {
-                                        DB::select("update $table set C1 = 'out' where DeviceLogId = $device_log->DeviceLogId");
-                                    } elseif ($index > 1) {
-                                        $datetime1 = new DateTime($device_logs[$index - 1]->LogDate);
-                                        $datetime2 = new DateTime($device_log->LogDate);
+                                    if ($device_logs_count->deviceCount >= 3) {
+
+                                        $datetime1 = new DateTime($device_logs_[0]->LogDate);
+                                        $datetime2 = new DateTime($device_logs_[1]->LogDate);
                                         $interval = $datetime1->diff($datetime2);
                                         //$elapsed = $interval->format('%y years %m months %a days %h hours %i minutes %s seconds');
                                         $hours = $interval->format('%h');
                                         $minutes = $interval->format('%i');
-                                        $extra_gp = ($hours * 60 + $minutes);
-                                        DB::select("update $table set C2 = $extra_gp where DeviceLogId = $device_log->DeviceLogId");
-                                        $gatepass = new TempGatePass();
-                                        $gatepass->employee_id = $employee->EmployeeId;
-                                        $gatepass->late_min = $extra_gp;
-                                        $gatepass->date = $att_date;
-                                        $gatepass->session_id = $session_master->id;
-                                        $gatepass->save();
-                                        $gtm += $extra_gp;
-                                    }
-                                }
-                                /*holiday Overtime if present*/
+                                        $check5min = ($hours * 60 + $minutes);
+                                        if ($check5min < 5) {
+                                            $second_dev_id = $device_logs_[1]->DeviceLogId;
+                                            DB::select("delete from $table where DeviceLogId = $second_dev_id");
+                                        }
+                                        $now = Carbon::now();
+                                        $last_enter_time = $device_logs_[$device_logs_count->deviceCount - 1]->LogDate;
+                                        $last_enter_id = $device_logs_[$device_logs_count->deviceCount - 1]->DeviceLogId;
+                                        $second_last_enter_time = $device_logs_[$device_logs_count->deviceCount - 2]->LogDate;
+                                        if ($last_enter_time > $couttime) {
+                                            DB::select("update $table set C1 = 'in' and DeviceId = '166' AND LogDate = '$second_last_enter_time' where DeviceLogId = $last_enter_id");
+                                            DB::select("INSERT INTO $table(`DownloadDate`, `DeviceId`, `UserId`, `LogDate`,`C1`) VALUES ('$now',166,$employee->EmployeeCode,'$last_enter_time','out')");
+                                        } else {
+                                            DB::select("INSERT INTO $table(`DownloadDate`, `DeviceId`, `UserId`, `LogDate`,`C1`) VALUES ('$now',166,$employee->EmployeeCode,'$couttime','out')");
+                                        }
+                                    } else {
+                                        $now = Carbon::now();
+                                        $last_enter_time = $device_logs_[0]->LogDate;
+                                        $last_enter_id = $device_logs_[0]->DeviceLogId;
+                                        if ($last_enter_time > $couttime) {
+                                            DB::select("update $table set C1 = 'out' where DeviceLogId = $last_enter_id");
+                                            DB::select("INSERT INTO $table(`DownloadDate`, `DeviceId`, `UserId`, `LogDate`,`C1`) VALUES ('$now',166,$employee->EmployeeCode,'$cintime','in')");
+                                        } else {
+//                                            DB::select("update $table set C1 = 'in' and LogDate = '$cintime' where DeviceLogId = $last_enter_id");
+                                            DB::select("update $table set C1 = 'in' where DeviceLogId = $last_enter_id");
 
+                                            DB::select("INSERT INTO $table(`DownloadDate`, `DeviceId`, `UserId`, `LogDate`,`C1`) VALUES ('$now',166,$employee->EmployeeCode,'$couttime','out')");
+                                        }
+
+                                    }
+
+//                                    DB::select("UPDATE `attendancelogs` SET OutTime = '$couttime' WHERE EmployeeId = $employee->EmployeeId and  AttendanceDate like '%$att_date%'");
+                                }
+
+                                $device_logs = DB::select("SELECT * FROM $table WHERE UserId = $employee->EmployeeCode and LogDate like '%$att_date%' ORDER by LogDate ASC");//2;
+
+//                                $array_ = array();
+                                $indate = $device_logs[0]->LogDate;
+                                DB::select("UPDATE `attendancelogs` SET InTime = '$indate' WHERE EmployeeId = $employee->EmployeeId and  AttendanceDate like '%$att_date%'");
+                                DB::select("UPDATE `attendancelogs` SET C1 = '' WHERE EmployeeId = $employee->EmployeeId and  AttendanceDate like '%$att_date%'");
+                                DB::select("UPDATE `attendancelogs` SET C2 = '0' WHERE EmployeeId = $employee->EmployeeId and  AttendanceDate like '%$att_date%'");
+                                foreach ($device_logs as $index => $device_log1) {
+                                    if ($index % 2 == 0) {
+                                        if ($index >= 2 && $device_log1->LogDate < $couttime) {
+                                            $datetime1 = new DateTime($device_logs[$index - 1]->LogDate);
+                                            $datetime2 = new DateTime($device_log1->LogDate);
+                                            $interval = $datetime1->diff($datetime2);
+                                            $hours = $interval->format('%h');
+                                            $minutes = $interval->format('%i');
+                                            $extra_gp = ($hours * 60 + $minutes);
+                                            DB::select("update $table set C2 = $extra_gp where DeviceLogId = $device_log1->DeviceLogId");
+//                                            DB::select("UPDATE `attendancelogs` SET C2 = C2 + $extra_gp WHERE EmployeeId = $employee->EmployeeId and  AttendanceDate like '%$att_date%'");
+
+                                            $gatepass = new TempGatePass();
+                                            $gatepass->employee_id = $employee->EmployeeId;
+                                            $gatepass->late_min = $extra_gp;
+                                            $gatepass->date = $att_date;
+                                            $gatepass->session_id = $session_master->id;
+                                            $gatepass->comment = "Between Working hours checkin/checkout min $extra_gp";
+                                            $gatepass->save();
+
+                                            $Att_Save = Attendancelogs::where(['AttendanceLogId' => $value->AttendanceLogId])->first();
+                                            $Att_Save->C1 .= "</br>Between Working hours checkin/checkout min $extra_gp";
+                                            $Att_Save->C2 += $extra_gp;
+                                            $Att_Save->save();
+
+                                        }
+//                                        dd("if%2_".$index);
+//                                        $array_[] ="$device_log1->DeviceLogId"."_if";
+                                        DB::select("update $table set C1 = 'in' where DeviceLogId = $device_log1->DeviceLogId");
+//                                        DB::select("UPDATE `attendancelogs` SET OutTime = '$couttime' WHERE EmployeeId = $employee->EmployeeId and  AttendanceDate like '%$att_date%'");
+                                    } else {
+                                        DB::select("UPDATE `attendancelogs` SET OutTime = '$device_log1->LogDate' WHERE EmployeeId = $employee->EmployeeId and  AttendanceDate like '%$att_date%'");
+                                        DB::select("update $table set C1 = 'out' where DeviceLogId = $device_log1->DeviceLogId");
+
+                                        if ($index >= 2 && $device_log1->LogDate < $couttime) {
+                                            $datetime1 = new DateTime($device_logs[$index - 1]->LogDate);
+                                            $datetime2 = new DateTime($device_log1->LogDate);
+                                            $interval = $datetime1->diff($datetime2);
+                                            $hours = $interval->format('%h');
+                                            $minutes = $interval->format('%i');
+                                            $extra_gp = ($hours * 60 + $minutes);
+                                            DB::select("update $table set C2 = $extra_gp where DeviceLogId = $device_log1->DeviceLogId");
+//                                            DB::select("UPDATE `attendancelogs` SET C2 = C2 + $extra_gp WHERE EmployeeId = $employee->EmployeeId and  AttendanceDate like '%$att_date%'");
+
+                                            $gatepass = new TempGatePass();
+                                            $gatepass->employee_id = $employee->EmployeeId;
+                                            $gatepass->late_min = $extra_gp;
+                                            $gatepass->date = $att_date;
+                                            $gatepass->session_id = $session_master->id;
+                                            $gatepass->comment = "Between Working hours checkin/checkout min $extra_gp";
+                                            $gatepass->save();
+
+                                            $Att_Save = Attendancelogs::where(['AttendanceLogId' => $value->AttendanceLogId])->first();
+                                            $Att_Save->C1 .= "</br>Gatepass Entry $extra_gp min(In After $PFESIC->gate_pass_min min)";
+                                            $Att_Save->C2 += $extra_gp;
+                                            $Att_Save->save();
+
+                                        }
+                                    }/* else {
+//                                        $array_[] = "$device_log->DeviceLogId"."_else";
+                                        DB::select("update $table set C1 = 'in' where DeviceLogId = $device_log->DeviceLogId");
+                                    }*/
+                                }
+//                                dd($att_date);
+//                                dd($array_);
+
+                                /*holiday Overtime if present*/
+                                $att_check_entry = DB::selectOne("select * from `attendancelogs` WHERE EmployeeId = $employee->EmployeeId and  AttendanceDate like '%$att_date%'");
                                 if (!isset($holiday_present_check)) {
                                     $emp_present_days += 1;
-                                    if ($value->InTime > $cintime) {
+                                    if ($att_check_entry->InTime > $cintime) {
                                         $datetime1 = new DateTime($cintime);
-                                        $datetime2 = new DateTime($value->InTime);
+                                        $datetime2 = new DateTime($att_check_entry->InTime);
                                         $interval = $datetime1->diff($datetime2);
                                         //$elapsed = $interval->format('%y years %m months %a days %h hours %i minutes %s seconds');
                                         $hours = $interval->format('%h');
@@ -262,18 +353,31 @@ class PayrollController extends Controller
                                             $gatepass = new TempGatePass();
                                             $gatepass->employee_id = $employee->EmployeeId;
                                             $gatepass->late_min = $lmt;
-                                            $gatepass->date = date_format(date_create($value->AttendanceDate), "Y-m-d");
+                                            $gatepass->date = date_format(date_create($att_check_entry->AttendanceDate), "Y-m-d");
                                             $gatepass->session_id = $session_master->id;
+                                            $gatepass->comment = "In After $PFESIC->gate_pass_min min Late";
                                             $gatepass->save();
+
+                                            $Att_Save = Attendancelogs::where(['AttendanceLogId' => $att_check_entry->AttendanceLogId])->first();
+                                            $Att_Save->C1 .= "</br>Gatepass Entry $lmt min(In After $PFESIC->gate_pass_min min)";
+                                            $Att_Save->C2 += $lmt;
+                                            $Att_Save->save();
+
+//                                            DB::select("UPDATE `attendancelogs` SET C2 = C2 + $lmt WHERE EmployeeId = $employee->EmployeeId and  AttendanceDate like '%$att_date%'");
+
                                             $gtm += $lmt;
                                         } else {
                                             $late_min1 += $lmt;
+
+                                            $Att_Save = Attendancelogs::where(['AttendanceLogId' => $att_check_entry->AttendanceLogId])->first();
+                                            $Att_Save->C1 .= "</br>Late Entry $lmt min";
+                                            $Att_Save->save();
                                         }
                                         $late_count++;
                                     }
-                                    if ($value->OutTime < $couttime) {
+                                    if ($att_check_entry->OutTime < $couttime) {
                                         $datetime11 = new DateTime($couttime);
-                                        $datetime21 = new DateTime($value->OutTime);
+                                        $datetime21 = new DateTime($att_check_entry->OutTime);
                                         $interval1 = $datetime11->diff($datetime21);
                                         //$elapsed = $interval->format('%y years %m months %a days %h hours %i minutes %s seconds');
                                         $hours1 = $interval1->format('%h');
@@ -283,13 +387,20 @@ class PayrollController extends Controller
                                         $gatepass = new TempGatePass();
                                         $gatepass->employee_id = $employee->EmployeeId;
                                         $gatepass->late_min = $late_min2;
-                                        $gatepass->date = date_format(date_create($value->AttendanceDate), "Y-m-d");
+                                        $gatepass->date = date_format(date_create($att_check_entry->AttendanceDate), "Y-m-d");
                                         $gatepass->session_id = $session_master->id;
+                                        $gatepass->comment = "Out Before $couttime";
                                         $gatepass->save();
+
+                                        $Att_Save = Attendancelogs::where(['AttendanceLogId' => $att_check_entry->AttendanceLogId])->first();
+                                        $Att_Save->C1 .= "</br>Gatepass Entry $late_min2 min(Out Before $couttime)";
+                                        $Att_Save->C2 += $late_min2;
+                                        $Att_Save->save();
+
                                         $gtm += $late_min2;
 
                                     } else {
-                                        $datetime11 = new DateTime($value->OutTime);
+                                        $datetime11 = new DateTime($att_check_entry->OutTime);
                                         $datetime21 = new DateTime($couttime);
                                         $interval1 = $datetime11->diff($datetime21);
                                         //$elapsed = $interval->format('%y years %m months %a days %h hours %i minutes %s seconds');
@@ -300,7 +411,7 @@ class PayrollController extends Controller
                                         $overtime = new TempOvertime();
                                         $overtime->employee_id = $employee->EmployeeId;
                                         $overtime->overtime_min = $overtime_min;
-                                        $overtime->date = date_format(date_create($value->AttendanceDate), "Y-m-d");
+                                        $overtime->date = date_format(date_create($att_check_entry->AttendanceDate), "Y-m-d");
                                         $overtime->session_id = $session_master->id;
                                         $overtime->save();
                                     }
@@ -319,7 +430,7 @@ class PayrollController extends Controller
                                     $overtime = new TempOvertime();
                                     $overtime->employee_id = $employee->EmployeeId;
                                     $overtime->overtime_min = $overtime_min;
-                                    $overtime->date = date_format(date_create($value->AttendanceDate), "Y-m-d");
+                                    $overtime->date = date_format(date_create($att_check_entry->AttendanceDate), "Y-m-d");
                                     $overtime->session_id = $session_master->id;
                                     $overtime->save();
                                 }
@@ -490,6 +601,8 @@ class PayrollController extends Controller
                     $payrole_model->created_time = Carbon::now('Asia/Kolkata');
                     $payrole_model->save();
 
+                } else {
+                    return Redirect::back()->with('errmessage', "Temp Payroll already generated for $employee->EmployeeName");
                 }
             }
             return redirect('create-payroll')->with('message', 'Temporary Payroll has been generated');

@@ -504,6 +504,15 @@
     $(document).ready(function () {
         blockPage();
         unblockPage();
+        $('.typeDD').select2();
+
+        $('#example').DataTable({
+            "pageLength": 25,
+        });
+        $('#example1').DataTable({
+            "pageLength": 25,
+        });
+        $('[data-toggle="tooltip"]').tooltip();
     });
     function blockPage() {
         //console.log("Page Blocking Is On");
@@ -520,6 +529,15 @@
         maxViewMode: 2,
         // endDate: '-18y',
         endDate: '+0d',
+        daysOfWeekHighlighted: "0",
+        autoclose: true,
+    });
+
+    $('.hdtp').datepicker({
+        format: "dd-M-yyyy",
+        maxViewMode: 2,
+        // endDate: '-18y',
+//        endDate: '+0d',
         daysOfWeekHighlighted: "0",
         autoclose: true,
     });
@@ -541,17 +559,7 @@
             $('#mb').html(data);
         });
     }
-    $(document).ready(function () {
-        $('.typeDD').select2();
 
-        $('#example').DataTable({
-            "pageLength": 25,
-        });
-        $('#example1').DataTable({
-            "pageLength": 25,
-        });
-        $('[data-toggle="tooltip"]').tooltip();
-    });
 </script>
 
 

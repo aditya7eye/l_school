@@ -1,5 +1,5 @@
 @extends('master.master')
-@section('title','7 EYE E-Commerce | Category List')
+@section('title','LKS Payroll | Category List')
 @section('content')
     <!-- partial -->
     <div class="container-fluid page-body-wrapper">

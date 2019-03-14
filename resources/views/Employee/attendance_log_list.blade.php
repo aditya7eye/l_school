@@ -13,7 +13,7 @@
             <tr>
                 <td>{{ isset($attendanc->UserId)?$attendanc->UserId :'' }}</td>
                 <td>{{date_format(date_create($attendanc->LogDate), "d-M-Y h:i A")}}</td>
-                <td>{{ isset($attendanc->C1)?$attendanc->C1 :'' }}</td>
+                <td>{{ isset($attendanc->C1)?$attendanc->C1 :'-' }}</td>
 
             </tr>
         @endforeach

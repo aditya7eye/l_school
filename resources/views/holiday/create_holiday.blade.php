@@ -1,5 +1,5 @@
 @extends('master.master')
-@section('title','7 EYE E-Commerce | Category List')
+@section('title','LKS Payroll | Category List')
 @section('content')
     <!-- partial -->
     <div class="container-fluid page-body-wrapper">
@@ -24,7 +24,7 @@
                                     @csrf
                                     <div class="col-sm-12">
                                         <div class="form-group">
-                                            <label for="Type">Projects</label>
+                                            <label for="Type">Employees</label>
                                             @php
                                                 $projects = \App\EmployeeModel::where(['is_active' => '1'])->get();
                                             @endphp
@@ -41,7 +41,7 @@
                                     <div class="col-sm-12">
                                         <div class="form-group">
                                             <label for="username">Date</label>
-                                            <input type="text" class="form-control dtp required" id="datepicker"
+                                            <input type="text" class="form-control hdtp required" id="datepicker"
                                                    name="date"
                                                    autocomplete="off" placeholder="Date"
                                                    maxlength="50">
@@ -69,13 +69,4 @@
             </div>
         </div>
     </div>
-    <script>
-        $('.dtp').datepicker({
-            format: "dd-M-yyyy",
-            maxViewMode: 2,
-            // endDate: '-18y',
-            daysOfWeekHighlighted: "0",
-            autoclose: true,
-        });
-    </script>
 @stop

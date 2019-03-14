@@ -5,6 +5,13 @@
         .mybg {
             padding: 10px 10px;
         }
+
+        #example2 > tbody > tr > td {
+            padding: 2px !important;
+            font-weight: 600 !important;
+            font-size: 12px !important;
+            text-align: center;
+        }
     </style>
 
     <div class="container-fluid page-body-wrapper" id="maindiv">
@@ -56,7 +63,7 @@
                                     <div class="form-group">
                                         <label for="exampleInputName1">Month</label>
                                         <select size="1" name="month" class="form-control">
-                                            <option {{isset($month)?$month == '1' ? 'selected':'' : ''}}value="1">
+                                            <option {{isset($month)?$month == '1' ? 'selected':'' : ''}} value="1">
                                                 January
                                             </option>
                                             <option {{isset($month)?$month == '2' ? 'selected':'' : ''}} value="2">
@@ -117,7 +124,7 @@
                                             $employeelist = \App\EmployeeModel::where(['is_active'=>1])->orderBy('EmployeeName','ASC')->get();
                                         @endphp
                                         <label for="exampleInputEmail3">Employee List</label>
-                                        <select size="1" name="employee_id" class="form-control">
+                                        <select size="1" name="employee_id" class="typeDD">
                                             @foreach($employeelist as $employee)
                                                 <option {{isset($employee_id)?$employee_id==$employee->EmployeeId?'selected':'':''}} value="{{$employee->EmployeeId}}">{{$employee->EmployeeName}}</option>
                                             @endforeach
@@ -137,39 +144,153 @@
                     <div class="card-body">
                         {{--<h4>Attendance Report</h4>--}}
                         {{--<hr>--}}
-                        <table class="center-aligned-table table table-bordered" id="example">
+                        <table class="center-aligned-table table table-bordered" id="example2">
                             <thead style="background-color: #34BF9B;">
                             <tr>
                                 <th class="border-bottom-0" style="color:white;">Employee Name</th>
                                 <th class="border-bottom-0" style="color:white;">Attendance Date</th>
                                 <th class="border-bottom-0" style="color:white;">Check In</th>
                                 <th class="border-bottom-0" style="color:white;">Check Out</th>
+                                <th class="border-bottom-0" style="color:white; width: 20%">Comment</th>
                                 <th class="border-bottom-0" style="color:white;">Option</th>
                             </tr>
                             </thead>
 
                             <tbody>
+                            @php
+                                $total_gatepass_min = 0;
+                            @endphp
+                            @if(isset($year))
+                                @php
+                                    $result= array();
+                                        foreach (\App\Attendancelogs::getSundays($year, $month) as $sunday) {
+                        $result[] = $sunday->format("d-M-Y");
+                   }
+
+                                @endphp
+                            @endif
                             @if(count($attendance) > 0)
                                 @foreach ($attendance as $index => $attendanc)
                                     @php
                                         $table = "devicelogs_" . $month . "_" . $year;
                                                         $empcode = $attendanc->employee->EmployeeCode;
                                         $attDate = date_format(date_create($attendanc->AttendanceDate), "Y-m-d");
-                                        $devicelogs = \Illuminate\Support\Facades\DB::select("SELECT * FROM $table WHERE UserId = '$empcode' and LogDate like '%$attDate%' order by DeviceLogId desc")
+                                        $devicelogs = \Illuminate\Support\Facades\DB::select("SELECT * FROM $table WHERE UserId = '$empcode' and LogDate like '%$attDate%' order by DeviceLogId desc");
+                                        $total_gatepass = \Illuminate\Support\Facades\DB::selectOne("SELECT sum(C2) as total_gatepass FROM $table WHERE UserId = '$empcode' and LogDate like '%$attDate%' order by DeviceLogId desc");
+                                    $att_date = date_format(date_create($attendanc->AttendanceDate), "d-M-Y");
+                                    $att_date_h = date_format(date_create($attendanc->AttendanceDate), "Y-m-d");
+
+                                    $holidays = DB::select("SELECT * FROM `holiday` WHERE date = '$att_date_h' and FIND_IN_SET('$attendanc->EmployeeId',employee_id) and is_active = 1");//2;
+
                                     @endphp
                                     <tr>
                                         <td>{{ isset($attendanc->employee->EmployeeName)?$attendanc->employee->EmployeeName :'' }}</td>
-                                        <td>{{ date_format(date_create($attendanc->AttendanceDate), "d-M-Y")}}</td>
-                                        <td>{{date_format(date_create($attendanc->InTime), "d-M-Y h:i A")}}</td>
-                                        <td>{{date_format(date_create($attendanc->OutTime), "d-M-Y h:i A")}}</td>
+                                        <td>{{$att_date }}</td>
                                         <td>
-                                            @if(count($devicelogs)>2)
+                                            @if(count($holidays) == 0)
+                                                @if(in_array("$att_date", $result))
+                                                    @if($attendanc->InTime != '1900-01-01 00:00:00')
+                                                        <span class="badge badge-success">Sunday({{date_format(date_create($attendanc->InTime), "d-M-Y h:i A")}}
+                                                            )</span>
+                                                    @else
+                                                        <span class="badge badge-success">Sunday</span>
+                                                    @endif
+
+                                                @else
+                                                    @if($attendanc->InTime != '1900-01-01 00:00:00')
+                                                        {{date_format(date_create($attendanc->InTime), "d-M-Y h:i A")}}
+                                                    @else
+                                                        <span class="badge badge-danger">{{"Absent"}}</span>
+                                                    @endif
+                                                @endif
+                                            @else
+                                                @if(in_array("$att_date", $result))
+                                                    @if($attendanc->InTime != '1900-01-01 00:00:00')
+                                                        <span class="badge badge-primary">{{"Holiday"}}
+                                                            ({{date_format(date_create($attendanc->InTime), "d-M-Y h:i A")}}
+                                                            )</span>
+                                                    @else
+                                                        <span class="badge badge-primary">{{"Holiday"}}</span>
+                                                    @endif
+
+                                                @else
+                                                    @if($attendanc->InTime != '1900-01-01 00:00:00')
+                                                        {{date_format(date_create($attendanc->InTime), "d-M-Y h:i A")}}
+                                                    @else
+                                                        <span class="badge badge-primary">{{"Holiday"}}</span>
+                                                    @endif
+                                                @endif
+                                            @endif
+                                        </td>
+
+                                        <td>
+                                            @if(count($holidays) == 0)
+                                                @if(in_array("$att_date", $result))
+                                                    @if($attendanc->OutTime != '1900-01-01 00:00:00')
+                                                        <span class="badge badge-success">Sunday({{date_format(date_create($attendanc->OutTime), "d-M-Y h:i A")}}
+                                                            )</span>
+                                                    @else
+                                                        <span class="badge badge-success">Sunday</span>
+                                                    @endif
+
+                                                @else
+                                                    @if($attendanc->OutTime != '1900-01-01 00:00:00')
+                                                        {{date_format(date_create($attendanc->OutTime), "d-M-Y h:i A")}}
+                                                    @else
+                                                        <span class="badge badge-danger">{{"Absent"}}</span>
+                                                    @endif
+                                                @endif
+                                            @else
+                                                @if(in_array("$att_date", $result))
+                                                    @if($attendanc->OutTime != '1900-01-01 00:00:00')
+                                                        <span class="badge badge-primary">{{"Holiday"}}
+                                                            ({{date_format(date_create($attendanc->OutTime), "d-M-Y h:i A")}}
+                                                            )</span>
+                                                    @else
+                                                        <span class="badge badge-primary">{{"Holiday"}}</span>
+                                                    @endif
+
+                                                @else
+                                                    @if($attendanc->OutTime != '1900-01-01 00:00:00')
+                                                        {{date_format(date_create($attendanc->OutTime), "d-M-Y h:i A")}}
+                                                    @else
+                                                        <span class="badge badge-primary">{{"Holiday"}}</span>
+                                                    @endif
+                                                @endif
+                                            @endif
+
+
+                                            {{--@if(in_array("$att_date", $result))--}}
+                                            {{--@if($attendanc->OutTime != '1900-01-01 00:00:00')--}}
+                                            {{--<span class="badge badge-success">Sunday({{date_format(date_create($attendanc->OutTime), "d-M-Y h:i A")}}--}}
+                                            {{--)</span>--}}
+                                            {{--@else--}}
+                                            {{--<span class="badge badge-success">Sunday</span>--}}
+                                            {{--@endif--}}
+                                            {{--@else--}}
+                                            {{--@if($attendanc->OutTime != '1900-01-01 00:00:00')--}}
+                                            {{--{{date_format(date_create($attendanc->OutTime), "d-M-Y h:i A")}}--}}
+                                            {{--@else--}}
+                                            {{--{{"Absent"}}--}}
+                                            {{--@endif--}}
+                                            {{--@endif--}}
+                                        </td>
+                                        <td>{!! isset($attendanc->C1)?$attendanc->C1 :'-' !!} </td>
+
+                                        <td>
+                                            @if($attendanc->C2 > 0)
                                                 <button type="button" class="btn btn-xs btn-success"
-                                                        onclick="view_attendance_log('{{$attDate}}','{{$empcode}}','{{$table}}')">View
-                                                    Attendance Log</button></td>
-                                        @else
-                                            {{"N/A"}}
-                                        @endif
+                                                        onclick="view_attendance_log('{{$attDate}}','{{$empcode}}','{{$table}}')">
+                                                    View Log
+                                                </button>(Gatepass-:{{$attendanc->C2}})
+                                                @php
+                                                    $total_gatepass_min+=$attendanc->C2;
+                                                @endphp
+                                            @else
+                                                {{"N/A"}}
+                                            @endif
+                                        </td>
+
                                     </tr>
                                 @endforeach
                             @else
@@ -179,7 +300,9 @@
                             @endif
                             </tbody>
                         </table>
+
                         <div class="row">
+                            <h4>Total Gatepass Min: {{$total_gatepass_min}}</h4>
                         </div>
 
 
@@ -189,6 +312,12 @@
 
 
             <script>
+                $(document).ready(function () {
+                    $('#example2').DataTable({
+                        "pageLength": 50,
+                    });
+                    $('[data-toggle="tooltip"]').tooltip();
+                });
                 $(window).scroll(function () {
                     var headerBottom = '.navbar.horizontal-layout .nav-bottom';
                     if ($(window).scrollTop() >= 70) {
@@ -200,7 +329,11 @@
 
                 function view_attendance_log(att_date, emp_code, table) {
                     $('#my').modal('show');
-                    $.get('{{ url('view_attendance_log') }}', {att_date: att_date, emp_code: emp_code,table:table}, function (data) {
+                    $.get('{{ url('view_attendance_log') }}', {
+                        att_date: att_date,
+                        emp_code: emp_code,
+                        table: table
+                    }, function (data) {
                         $('#mh').html('View Attendance Logs');
                         $('#mb').html(data);
 

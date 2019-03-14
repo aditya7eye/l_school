@@ -17,7 +17,7 @@ class AttendanceController extends Controller
         $month = $request->input('month');
         $employee_id = request('employee_id');
 //        $attendance = DB::select("SELECT * FROM `attendancelogs` WHERE EmployeeId = $employee_id and MONTH(AttendanceDate) = $month AND YEAR(AttendanceDate) = $year");
-        $attendance = Attendancelogs::whereMonth('AttendanceDate', '=', $month)->whereYear('AttendanceDate', '=', $year)->where('EmployeeId', '=', $employee_id)->get();
+        $attendance = Attendancelogs::whereMonth('AttendanceDate', '=', $month)->whereYear('AttendanceDate', '=', $year)->where('EmployeeId', '=', $employee_id)->orderBy('AttendanceDate','asc')->get();
         return view('employee.attendance_list')->with(['attendance' => $attendance, 'year' => $year, 'month' => $month, 'employee_id' => $employee_id]);
 
     }
