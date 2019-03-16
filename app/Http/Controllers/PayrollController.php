@@ -52,6 +52,25 @@ class PayrollController extends Controller
         return view('employee.create_payrole')->with(['payroles' => $payroles, 'temp_payroles' => $temp_payroles]);
     }
 
+
+    public function getTempPayrollEmployee()
+    {
+
+        $date = request('date');
+        $employee_id = request('employee_id');
+        if ($employee_id == 0) {
+            $temp_emp = DB::selectOne("SELECT GROUP_CONCAT(employee_id) as tpay_emp_id FROM `temp_payrole` WHERE date = '$date'");
+            $emp_ids = $temp_emp->tpay_emp_id != null ? $temp_emp->tpay_emp_id : '0';
+            $employees = DB::select("SELECT * from employees where employees.EmployeeId NOT IN ($emp_ids) and is_active = 1 ORDER BY employees.EmployeeName ASC LIMIT 10");
+        }else{
+            $employees = DB::select("SELECT * from employees where employees.EmployeeId IN ($employee_id)");
+        }
+
+//        $employees = EmployeeModel::whereNotIn('EmployeeId', [$temp_emp->tpay_emp_id])->where(['is_active' => 1])->take(10)->orderBy('EmployeeId', 'desc')->get();
+        return view('employee.temp_payroll_employee')->with(['employees' => $employees, 'date'=>$date]);
+    }
+
+
     public function payrole_list($date)
     {
         try {
@@ -89,15 +108,14 @@ class PayrollController extends Controller
     {
         $grosssal = 0;
         $payroll = TempPayrole::find(request('tid'));
-//        $session_master = SessionMaster::where(['is_active' => 1])->first();
-//        $employee_leave_left = EmployeeLeaveLeft::where(['employee_id' => $payroll->employee_id, 'session_id' => $session_master->id])->first();
         $total_pf = 0;
         $total_esic = 0;
-        $absent = $payroll->absent_days - (request('cl') + request('ml'));
+        $lwp = $payroll->lwp;
+        $absent = ($payroll->absent_days + $lwp) - (request('cl') + request('ml'));
         $oneday_sal = $payroll->salary / $payroll->month_days;
-        $total_deduction = $oneday_sal * ($absent + $payroll->lwp);
+        $total_deduction = $oneday_sal * ($absent);
         $total_deduction = round($total_deduction, 2);
-        $grosssal += $payroll->employee->salary - $payroll->total_gatepass - $total_deduction;
+        $grosssal += $payroll->employee->salary - $total_deduction;
         if ($payroll->employee->is_pf_applied == 1) {
             $pf_esic = PFESIC::find(1);
             $total_pf = ($grosssal * $pf_esic->pf) / 100;
@@ -107,9 +125,9 @@ class PayrollController extends Controller
             $total_esic = (($grosssal - $total_pf) * $pf_esic->esic) / 100;
             $total_esic = round($total_esic, 2);
         }
-        $total_deduction = $total_pf + $total_esic + $payroll->total_gatepass + $oneday_sal * ($absent + $payroll->lwp);
+        $total_deduction = $total_pf + $total_esic + $oneday_sal * ($absent);
         $payout = $payroll->salary - $total_deduction;
-        $payroll->modified_lwp = $absent + $payroll->lwp;
+        $payroll->modified_lwp = $absent;
         $payroll->is_modified = 1;
         $payroll->cl = request('cl');
         $payroll->ml = request('ml');
@@ -120,6 +138,10 @@ class PayrollController extends Controller
         $payroll->total_deduction = $total_deduction;
         $payroll->payout = number_format((float)$payout, 2, '.', '');
         $payroll->save();
+
+//        dd($payroll->cl);
+
+
         return redirect('view-temp-payroll' . '/' . base64_encode($payroll->date))->with('message', 'Temporary Payroll has been updated');
 //        return view('employee.edit_temp_payroll');
     }
@@ -221,6 +243,7 @@ class PayrollController extends Controller
                                 $table = "devicelogs_" . $month . "_" . $year;
                                 $device_logs_ = DB::select("SELECT * FROM $table WHERE UserId = $employee->EmployeeCode and LogDate like '%$att_date%' ORDER by LogDate ASC");//2;
                                 $device_logs_count = DB::selectOne("SELECT COUNT(DeviceLogId) as deviceCount FROM $table WHERE UserId = $employee->EmployeeCode and LogDate like '%$att_date%'");//2;
+                                $now = Carbon::now('Asia/Kolkata');
                                 if ($device_logs_count->deviceCount % 2 != 0) {
                                     if ($device_logs_count->deviceCount >= 3) {
 
@@ -235,18 +258,19 @@ class PayrollController extends Controller
                                             $second_dev_id = $device_logs_[1]->DeviceLogId;
                                             DB::select("delete from $table where DeviceLogId = $second_dev_id");
                                         }
-                                        $now = Carbon::now();
+
                                         $last_enter_time = $device_logs_[$device_logs_count->deviceCount - 1]->LogDate;
                                         $last_enter_id = $device_logs_[$device_logs_count->deviceCount - 1]->DeviceLogId;
                                         $second_last_enter_time = $device_logs_[$device_logs_count->deviceCount - 2]->LogDate;
                                         if ($last_enter_time > $couttime) {
-                                            DB::select("update $table set C1 = 'in' and DeviceId = '166' AND LogDate = '$second_last_enter_time' where DeviceLogId = $last_enter_id");
+                                            DB::select("update $table set DeviceId = '166' where DeviceLogId = $last_enter_id");
+                                            DB::select("update $table set C1 = 'in' where DeviceLogId = $last_enter_id");
+                                            DB::select("update $table set LogDate = '$second_last_enter_time' where DeviceLogId = $last_enter_id");
                                             DB::select("INSERT INTO $table(`DownloadDate`, `DeviceId`, `UserId`, `LogDate`,`C1`) VALUES ('$now',166,$employee->EmployeeCode,'$last_enter_time','out')");
                                         } else {
                                             DB::select("INSERT INTO $table(`DownloadDate`, `DeviceId`, `UserId`, `LogDate`,`C1`) VALUES ('$now',166,$employee->EmployeeCode,'$couttime','out')");
                                         }
                                     } else {
-                                        $now = Carbon::now();
                                         $last_enter_time = $device_logs_[0]->LogDate;
                                         $last_enter_id = $device_logs_[0]->DeviceLogId;
                                         if ($last_enter_time > $couttime) {
@@ -341,7 +365,7 @@ class PayrollController extends Controller
                                 $att_check_entry = DB::selectOne("select * from `attendancelogs` WHERE EmployeeId = $employee->EmployeeId and  AttendanceDate like '%$att_date%'");
                                 if (!isset($holiday_present_check)) {
                                     $emp_present_days += 1;
-                                    if ($att_check_entry->InTime > $cintime) {
+                                    if (Carbon::parse($att_check_entry->InTime)->addMinute()->format('H:i') > Carbon::parse($cintime)->addMinute(+2)->format('H:i')) {
                                         $datetime1 = new DateTime($cintime);
                                         $datetime2 = new DateTime($att_check_entry->InTime);
                                         $interval = $datetime1->diff($datetime2);
@@ -367,15 +391,17 @@ class PayrollController extends Controller
 
                                             $gtm += $lmt;
                                         } else {
-                                            $late_min1 += $lmt;
+                                            if ($lmt > 0) {
+                                                $late_min1 += $lmt;
 
-                                            $Att_Save = Attendancelogs::where(['AttendanceLogId' => $att_check_entry->AttendanceLogId])->first();
-                                            $Att_Save->C1 .= "</br>Late Entry $lmt min";
-                                            $Att_Save->save();
+                                                $Att_Save = Attendancelogs::where(['AttendanceLogId' => $att_check_entry->AttendanceLogId])->first();
+                                                $Att_Save->C1 .= "</br>Late Entry $lmt min";
+                                                $Att_Save->save();
+                                                $late_count++;
+                                            }
                                         }
-                                        $late_count++;
                                     }
-                                    if ($att_check_entry->OutTime < $couttime) {
+                                    if (Carbon::parse($att_check_entry->OutTime)->addMinute()->format('H:i') < Carbon::parse($couttime)->addMinute(-2)->format('H:i')) {
                                         $datetime11 = new DateTime($couttime);
                                         $datetime21 = new DateTime($att_check_entry->OutTime);
                                         $interval1 = $datetime11->diff($datetime21);
@@ -415,7 +441,7 @@ class PayrollController extends Controller
                                         $overtime->session_id = $session_master->id;
                                         $overtime->save();
                                     }
-                                    $late_min = $late_min1 + $late_min2;
+                                    $late_min = $late_min1;
 //                                    $gatepassmin += $gtm;
 //                        $pdate_arr[] = $value->AttendanceDate;
                                 } else {
@@ -570,6 +596,9 @@ class PayrollController extends Controller
 
                     $total_deduction = $total_pf + $total_esic + $total_gatepass + $oneday_sal * ($lwp + $absent);
                     $payout = $employee->salary - $total_deduction;
+
+                    $lwp += $gtDays;
+
                     /*********************Gross Salary Deduction Calculation***************************/
 
                     $payrole_model = new TempPayrole();

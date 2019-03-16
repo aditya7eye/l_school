@@ -86,11 +86,11 @@
                                 <th class="border-bottom-0" style="color:white;">Late Count</th>
                                 <th class="border-bottom-0" style="color:white;">Late Coming Minute</th>
                                 <th class="border-bottom-0" style="color:white;">Pre. Gatepass Minute</th>
-                                <th class="border-bottom-0" style="color:white;">Gatepass Minute</th>
-                                <th class="border-bottom-0" style="color:white;">Total Gatepass</th>
+                                <th class="border-bottom-0" style="color:white;">New Gatepass Minute</th>
+                                <th class="border-bottom-0" style="color:white;">Total Gatepass Deduction</th>
                                 <th class="border-bottom-0" style="color:white;">Leave Without Pay</th>
                                 @if($temp == 1)
-                                    <th class="border-bottom-0" style="color:white;">Modified Leave</th>
+                                    <th class="border-bottom-0" style="color:white;">Modified Leave Taken</th>
                                 @endif
                                 <th class="border-bottom-0" style="color:white;">Overtime Minute</th>
                                 <th class="border-bottom-0" style="color:white;">Paid Leave</th>
@@ -139,7 +139,7 @@
                                         <td>{{ $payrole->payout }}</td>
                                         @if($temp == 1)
                                             <td>
-                                                @if($payrole->absent_days > 0)
+                                                @if($payrole->absent_days > 0 || $payrole->lwp > 0)
                                                     <div class="dropdown btn-sm">
                                                         <button type="button"
                                                                 class="btn btn-success btn-xs dropdown-toggle"
@@ -219,6 +219,8 @@
 
         function update_temp_payroll(id) {
             $('#my').modal('show');
+            $('#modal_type').removeClass('modal-md');
+            $('#modal_type').addClass('modal-lg');
             $.get('{{ url('edit_temp_payroll') }}', {tid: id}, function (data) {
                 $('#mh').html('Edit Temporary Payroll Leave');
                 $('#mb').html(data);

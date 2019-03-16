@@ -55,6 +55,9 @@ Route::group(['middleware' => 'usersession'], function () {
     Route::get('active_employee', 'Employee_Controller@active_employee');
     Route::get('inactive_employee','Employee_Controller@inactive_employee');
 
+    Route::get('getTempPayrollEmployee','PayrollController@getTempPayrollEmployee');   //16th March 2019
+
+
     Route::get('attendance_list','AttendanceController@attendance_list');
     Route::get('getAttendance','AttendanceController@attendance_list');
     Route::get('view_attendance_log','AttendanceController@view_attendance_log');

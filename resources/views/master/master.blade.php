@@ -175,6 +175,11 @@
             filter: alpha(opacity=40)
         }
 
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #444;
+            line-height: normal !important;
+        }
+
     </style>
 </head>
 

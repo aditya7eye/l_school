@@ -1,6 +1,8 @@
 @extends('master.master')
 @section('title','L.K.S.S.S. | GPayroll Payrole')
 @section('content')
+    <link rel="stylesheet" href="{{ url('css/checkbox.css') }}">
+
     <style>
         .mybg {
             padding: 10px 10px;
@@ -27,19 +29,20 @@
                                             $employeelist = \App\EmployeeModel::where(['is_active'=>1])->get();
                                         @endphp
                                         <label for="exampleInputEmail3">Employee List</label>
-                                        <select size="1" name="employee_id[]" class="form-control typeDD"
-                                                style="width: 100%;" multiple>
-                                            <option selected value="0">ALL</option>
+                                        <select size="1" name="" class="form-control typeDD" id="employee_id"
+                                                style="width: 100%;">
+                                            <option selected value="0">Select Any One</option>
                                             @foreach($employeelist as $employee)
                                                 <option value="{{$employee->EmployeeId}}">{{$employee->EmployeeName}}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                 </div>
+
                                 <div class="col-sm-3">
                                     <div class="form-group">
                                         <label for="exampleInputName1">Month</label>
-                                        <select size="1" name="month" class="form-control">
+                                        <select size="1" id="month_name" name="month" class="form-control">
                                             <option selected value="1">January</option>
                                             <option value="2">February</option>
                                             <option value="3">March</option>
@@ -62,7 +65,7 @@
                                         @php
                                             $already_selected_value = 2019;
                                             $earliest_year = 2001;
-                                            print '<select name="year" class="form-control">';
+                                            print '<select name="year" id="year_name" class="form-control">';
                                                 foreach (range(date('Y'), $earliest_year) as $x) {
                                                 print '<option value="'.$x.'"'.($x === $already_selected_value ? ' selected="selected"' : '').'>'.$x.'</option>';
                                                 }
@@ -72,9 +75,14 @@
                                 </div>
                                 <div class="col-sm-3">
                                     <label for="exampleInputEmail3"></label><br>
-                                    <button type="submit" onclick="blockPage();" class="btn btn-warning mr-2">Submit
+                                    <button type="button"
+                                            {{--onclick="blockPage();"--}} onclick="getTempPayrollEmployee()"
+                                            class="btn btn-warning mr-2">Get Employee List
                                     </button>
                                 </div>
+                            </div>
+                            <div id="EmpList">
+
                             </div>
                         </form>
                     </div>
@@ -103,14 +111,14 @@
                                 @foreach ($temp_payroles as $index => $payrole)
                                     @php
 
-                                            $array  = explode(",", $payrole->date);
-                                        $total_pf = \App\TempPayrole::where(['date'=>$payrole->date])->sum('total_pf');
-                                        $total_esic = \App\TempPayrole::where(['date'=>$payrole->date])->sum('total_esic');
-                                        $total_payout = \App\TempPayrole::where(['date'=>$payrole->date])->sum('payout');
-                                        $modified_count = \App\TempPayrole::where(['date'=>$payrole->date,'is_modified'=>1])->count();
-                                        $total_payout = number_format("$total_payout",2,".",",");
-                                        $total_pf = number_format("$total_pf",2,".",",");
-                                        $total_esic = number_format("$total_esic",2,".",",");
+                                        $array  = explode(",", $payrole->date);
+                                    $total_pf = \App\TempPayrole::where(['date'=>$payrole->date])->sum('total_pf');
+                                    $total_esic = \App\TempPayrole::where(['date'=>$payrole->date])->sum('total_esic');
+                                    $total_payout = \App\TempPayrole::where(['date'=>$payrole->date])->sum('payout');
+                                    $modified_count = \App\TempPayrole::where(['date'=>$payrole->date,'is_modified'=>1])->count();
+                                    $total_payout = number_format("$total_payout",2,".",",");
+                                    $total_pf = number_format("$total_pf",2,".",",");
+                                    $total_esic = number_format("$total_esic",2,".",",");
 
                                     @endphp
                                     <tr>
@@ -233,7 +241,30 @@
     </div>
 
 
-    <script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            getTempPayrollEmployee();
+        });
+        function getTempPayrollEmployee() {
+            var editurl = '{{ url('getTempPayrollEmployee') }}';
+            var month_name = $('#month_name').val();
+            var year_name = $('#year_name').val();
+            var employee_id = $('#employee_id').val();
+            $.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: editurl,
+                data: {date: month_name + ',' + year_name, employee_id: employee_id},
+                success: function (data) {
+                    $('#EmpList').html(data);
+                },
+                error: function (xhr, status, error) {
+                    $('#mb').html(xhr.responseText);
+                    //$('.modal-body').html("Technical Error Occured!");
+                }
+            });
+        }
+
 
         function del_payroll(e_id) {
             {{--swal({--}}
