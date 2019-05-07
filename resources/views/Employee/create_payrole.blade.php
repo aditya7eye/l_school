@@ -26,7 +26,7 @@
 
                                     <div class="form-group">
                                         @php
-                                            $employeelist = \App\EmployeeModel::where(['is_active'=>1])->get();
+                                            $employeelist = \App\EmployeeModel::where(['is_active'=>1])->where('employee_type_id','<=',5)->get();
                                         @endphp
                                         <label for="exampleInputEmail3">Employee List</label>
                                         <select size="1" name="" class="form-control typeDD" id="employee_id"
@@ -147,13 +147,12 @@
                                                     <a class="dropdown-item"
                                                        href="{{url('view-temp-payroll').'/'.base64_encode($payrole->date)}}">View
                                                         Temp Payrolls</a>
-                                                    <a class="dropdown-item"
-                                                       {{-- href="{{url('delete_payroll_temp?date=').$payrole->date}}"--}} onclick="del_payroll('{{$payrole->date}}');"
-                                                       href="#">Delete Temp Payroll</a>
+                                                    <a class="dropdown-item"  style="cursor: pointer;"
+                                                       {{-- href="{{url('delete_payroll_temp?date=').$payrole->date}}"--}} onclick="del_payroll('{{$payrole->date}}');">Delete Temp Payroll</a>
                                                     {{--                                                    @if($payrole->payrole_generated == $modified_count)--}}
                                                     <a class="dropdown-item"
-                                                       onclick="convert_payroll('{{base64_encode($payrole->date)}}')"
-                                                       href="{{--{{url('convert_payroll').'/'.base64_encode($payrole->date)}}--}}#">Mark
+                                                       onclick="convert_payroll('{{base64_encode($payrole->date)}}')"  style="cursor: pointer;"
+                                                       {{--href="--}}{{--{{url('convert_payroll').'/'.base64_encode($payrole->date)}}--}}{{--#"--}}>Mark
                                                         as locked</a>
                                                     {{--@endif--}}
                                                 </div>

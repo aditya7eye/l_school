@@ -55,7 +55,8 @@
         }
 
     </style>
-
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.5.6/css/buttons.dataTables.min.css">
     <div class="container-fluid page-body-wrapper" id="maindiv">
         <div class="main-panel">
             <div class="content-wrapper">
@@ -77,7 +78,7 @@
                                 {{--<th class="border-bottom-0" style="color:white;">ID</th>--}}
                                 <th class="border-bottom-0" style="color:white;">Month/Year</th>
                                 <th class="border-bottom-0" style="color:white;">Employee Name</th>
-                                <th class="border-bottom-0" style="color:white;">Month Days</th>
+                                {{--<th class="border-bottom-0" style="color:white;">Month Days</th>--}}
                                 <th class="border-bottom-0" style="color:white;">Weekend Days</th>
                                 <th class="border-bottom-0" style="color:white;">holidays</th>
                                 <th class="border-bottom-0" style="color:white;">Working Days</th>
@@ -111,10 +112,10 @@
                             @if(count($payroles) > 0)
                                 @foreach ($payroles as $index => $payrole)
                                     <tr>
-{{--                                        <td>{{ $payrole->employee_id }}</td>--}}
+                                        {{--                                        <td>{{ $payrole->employee_id }}</td>--}}
                                         <td>{{ $payrole->date }}</td>
                                         <td>{{ $payrole->employee->EmployeeName }}</td>
-                                        <td>{{ $payrole->month_days }}</td>
+                                        {{--                                        <td>{{ $payrole->month_days }}</td>--}}
                                         <td>{{ $payrole->weekend_days }}</td>
                                         <td>{{ $payrole->holidays }}</td>
                                         <td>{{ $payrole->working_days }}</td>
@@ -139,22 +140,29 @@
                                         <td>{{ $payrole->payout }}</td>
                                         @if($temp == 1)
                                             <td>
-                                                @if($payrole->absent_days > 0 || $payrole->lwp > 0)
-                                                    <div class="dropdown btn-sm">
-                                                        <button type="button"
-                                                                class="btn btn-success btn-xs dropdown-toggle"
-                                                                data-toggle="dropdown">
-                                                            Option
-                                                        </button>
-                                                        <div class="dropdown-menu">
-                                                            <a class="dropdown-item" href="#"
+
+                                                <div class="dropdown btn-sm">
+                                                    <button type="button"
+                                                            class="btn btn-success btn-xs dropdown-toggle"
+                                                            data-toggle="dropdown">
+                                                        Option
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        @if($payrole->absent_days > 0 || $payrole->lwp > 0)
+                                                            <a class="dropdown-item" style="cursor: pointer;"
                                                                onclick="update_temp_payroll('{{ $payrole->id }}');">Edit
                                                                 Paid Leave</a>
-                                                        </div>
+                                                        @endif
+                                                        <a class="dropdown-item" style="cursor: pointer;"
+                                                           onclick="del_temp_payroll({{ $payrole->id }});">Delete</a>
                                                     </div>
-                                                @else
-                                                    <span class="badge badge-danger">No Leave Taken</span>
-                                                @endif
+                                                </div>
+                                                {{--@else--}}
+                                                {{--<span class="badge badge-danger">No Leave Taken</span>--}}
+                                                {{--@endif--}}
+                                                {{--<button onclick="del_temp_payroll({{ $payrole->id }});"--}}
+                                                {{--class="btn btn-danger ">Delete--}}
+                                                {{--</button>--}}
                                             </td>
                                         @endif
 
@@ -225,6 +233,28 @@
                 $('#mh').html('Edit Temporary Payroll Leave');
                 $('#mb').html(data);
             });
+        }
+
+        function del_temp_payroll(e_id) {
+            swal({
+                title: "Are you sure?",
+                text: "Once deleted, you will not be able to recover this imaginary file!",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            }).then((willDelete) => {
+                        if (willDelete) {
+                            $.get('{{ url('delete_temp_payroll') }}', {pid: e_id}, function (data) {
+                                success_noti("Temp Payroll has been deleted");
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 1000);
+                            });
+
+                        }
+                    }
+            );
+
         }
     </script>
     <!-- content-wrapper ends -->

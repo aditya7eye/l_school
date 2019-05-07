@@ -61,13 +61,13 @@ class PayrollController extends Controller
         if ($employee_id == 0) {
             $temp_emp = DB::selectOne("SELECT GROUP_CONCAT(employee_id) as tpay_emp_id FROM `temp_payrole` WHERE date = '$date'");
             $emp_ids = $temp_emp->tpay_emp_id != null ? $temp_emp->tpay_emp_id : '0';
-            $employees = DB::select("SELECT * from employees where employees.EmployeeId NOT IN ($emp_ids) and is_active = 1 ORDER BY employees.EmployeeName ASC LIMIT 10");
-        }else{
+            $employees = DB::select("SELECT * from employees where employees.EmployeeId NOT IN ($emp_ids) and employee_type_id <= 5 and is_active = 1 ORDER BY employees.EmployeeName ASC LIMIT 10");
+        } else {
             $employees = DB::select("SELECT * from employees where employees.EmployeeId IN ($employee_id)");
         }
 
 //        $employees = EmployeeModel::whereNotIn('EmployeeId', [$temp_emp->tpay_emp_id])->where(['is_active' => 1])->take(10)->orderBy('EmployeeId', 'desc')->get();
-        return view('employee.temp_payroll_employee')->with(['employees' => $employees, 'date'=>$date]);
+        return view('employee.temp_payroll_employee')->with(['employees' => $employees, 'date' => $date]);
     }
 
 
@@ -166,7 +166,7 @@ class PayrollController extends Controller
 
 //        return $employee_id;
         if ($employee_id != '') {
-            $month_days = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+            $month_days = 30;//cal_days_in_month(CAL_GREGORIAN, $month, $year);
 
             $employee_list = $employee_id[0] == 0 ? EmployeeModel::where(['is_active' => 1])->get() : EmployeeModel::where(['is_active' => 1])->whereIn('EmployeeId', $employee_id)->get();
 
@@ -187,7 +187,7 @@ class PayrollController extends Controller
 
                     $late_min = 0;
                     $late_min1 = 0;
-                    $late_min2 = 0;
+
                     $overtime_min = 0;
                     $gtm = 0;
                     $gatepassmin = 0;
@@ -220,8 +220,43 @@ class PayrollController extends Controller
                     $left_max_ml = $given_max_ml - $taken_ml;
 
                     $present_days = DB::selectOne("SELECT COUNT(AttendanceLogId) as present_days FROM `attendancelogs` WHERE StatusCode = 'P' and EmployeeId = $employee->EmployeeId and MONTH(AttendanceDate) = $month AND YEAR(AttendanceDate) = $year");
-                    $attendance_records = DB::select("SELECT * FROM `attendancelogs` WHERE StatusCode = 'P' and EmployeeId = $employee->EmployeeId and MONTH(AttendanceDate) = $month AND YEAR(AttendanceDate) = $year");
+                    $attendance_records = DB::select("SELECT * FROM `attendancelogs` WHERE InTime != '1900-01-01 00:00:00' and EmployeeId = $employee->EmployeeId and MONTH(AttendanceDate) = $month AND YEAR(AttendanceDate) = $year");
 
+                    $absent_records = DB::select("SELECT * FROM `attendancelogs` WHERE InTime = '1900-01-01 00:00:00' and EmployeeId = $employee->EmployeeId and MONTH(AttendanceDate) = $month AND YEAR(AttendanceDate) = $year ORDER BY AttendanceDate ASC");
+                    $abs_arr = array();
+
+                    foreach ($absent_records as $index => $absent_record) {
+                        $result_sunday = array();
+
+                        foreach (Attendancelogs::getSundays($year, $month) as $sunday) {
+                            $result_sunday[] = $sunday->format("Y-m-d");
+                        }
+                        if ($index > 0) {
+                            $to = $absent_records[$index - 1]->AttendanceDate;
+                            $from = $absent_records[$index]->AttendanceDate;
+                            $att_date_h_to = date_format(date_create($to), "Y-m-d");
+                            $att_date_h_from = date_format(date_create($from), "Y-m-d");
+                            $holidays_counts_to = DB::select("SELECT * FROM `holiday` WHERE date = '$att_date_h_to' and FIND_IN_SET('$employee->EmployeeId',employee_id) and is_active = 1");//2;
+                            $holidays_counts_from = DB::select("SELECT * FROM `holiday` WHERE date = '$att_date_h_from' and FIND_IN_SET('$employee->EmployeeId',employee_id) and is_active = 1");//2;
+                            $diff_in_days = Carbon::parse($to)->diffInDays($from);
+//                            $diff_in_days = $to->diffInDays($from);
+                            if ($diff_in_days == 1) {
+                                if (!in_array($to, $abs_arr) && count($holidays_counts_to) == 0 && !in_array("$att_date_h_to", $result_sunday)) {
+                                    array_push($abs_arr, $to);
+                                }
+                                if (!in_array($from, $abs_arr) && count($holidays_counts_from) == 0 && !in_array("$att_date_h_from", $result_sunday)) {
+                                    array_push($abs_arr, $from);
+                                }
+
+                            } else {
+                                if ($absent_records[$index - 1]->StatusCode == 'A' && !in_array($to, $abs_arr) && count($holidays_counts_to) == 0 && !in_array("$att_date_h_to", $result_sunday)) {
+                                    array_push($abs_arr, $to);
+                                }
+                            }
+//                            echo nl2br("$absent_record->AttendanceDate\n");
+                        }
+                    }
+//                    return ($abs_arr);
 
                     /*********************Late Min/Count Calculation***************************/
                     if ($present_days->present_days > 0) {
@@ -233,6 +268,7 @@ class PayrollController extends Controller
                         if (count($attendance_records) > 0) {
                             $PFESIC = PFESIC::find(1);
                             foreach ($attendance_records as $value) {
+                                $late_min2 = 0;
                                 $employee_arr1 = array();
                                 $att_date = date_format(date_create($value->AttendanceDate), "Y-m-d");
                                 $cintime = $att_date . ' ' . $employee->check_in;
@@ -244,6 +280,22 @@ class PayrollController extends Controller
                                 $device_logs_ = DB::select("SELECT * FROM $table WHERE UserId = $employee->EmployeeCode and LogDate like '%$att_date%' ORDER by LogDate ASC");//2;
                                 $device_logs_count = DB::selectOne("SELECT COUNT(DeviceLogId) as deviceCount FROM $table WHERE UserId = $employee->EmployeeCode and LogDate like '%$att_date%'");//2;
                                 $now = Carbon::now('Asia/Kolkata');
+                                if ($device_logs_count->deviceCount == 2 || $device_logs_count->deviceCount == 3) {
+                                    $datetime1 = new DateTime($device_logs_[0]->LogDate);
+                                    $datetime2 = new DateTime($device_logs_[1]->LogDate);
+                                    $interval = $datetime1->diff($datetime2);
+                                    //$elapsed = $interval->format('%y years %m months %a days %h hours %i minutes %s seconds');
+                                    $hours = $interval->format('%h');
+                                    $minutes = $interval->format('%i');
+                                    $check5min = ($hours * 60 + $minutes);
+                                    if ($check5min < 10) {
+                                        $second_dev_id = $device_logs_[1]->DeviceLogId;
+                                        DB::select("delete from $table where DeviceLogId = $second_dev_id");
+                                    }
+
+                                }
+                                $device_logs_ = DB::select("SELECT * FROM $table WHERE UserId = $employee->EmployeeCode and LogDate like '%$att_date%' ORDER by LogDate ASC");//2;
+                                $device_logs_count = DB::selectOne("SELECT COUNT(DeviceLogId) as deviceCount FROM $table WHERE UserId = $employee->EmployeeCode and LogDate like '%$att_date%'");//2;
                                 if ($device_logs_count->deviceCount % 2 != 0) {
                                     if ($device_logs_count->deviceCount >= 3) {
 
@@ -365,7 +417,7 @@ class PayrollController extends Controller
                                 $att_check_entry = DB::selectOne("select * from `attendancelogs` WHERE EmployeeId = $employee->EmployeeId and  AttendanceDate like '%$att_date%'");
                                 if (!isset($holiday_present_check)) {
                                     $emp_present_days += 1;
-                                    if (Carbon::parse($att_check_entry->InTime)->addMinute()->format('H:i') > Carbon::parse($cintime)->addMinute(+2)->format('H:i')) {
+                                    if (Carbon::parse($att_check_entry->InTime)->addMinute(0)->format('H:i:59') > Carbon::parse($cintime)->addMinute(+2)->format('H:i:59')) {
                                         $datetime1 = new DateTime($cintime);
                                         $datetime2 = new DateTime($att_check_entry->InTime);
                                         $interval = $datetime1->diff($datetime2);
@@ -401,14 +453,14 @@ class PayrollController extends Controller
                                             }
                                         }
                                     }
-                                    if (Carbon::parse($att_check_entry->OutTime)->addMinute()->format('H:i') < Carbon::parse($couttime)->addMinute(-2)->format('H:i')) {
+                                    if (Carbon::parse($att_check_entry->OutTime)->addMinute(0)->format('H:i:s') < Carbon::parse($couttime)->addMinute(-2)->format('H:i:59')) {
                                         $datetime11 = new DateTime($couttime);
                                         $datetime21 = new DateTime($att_check_entry->OutTime);
-                                        $interval1 = $datetime11->diff($datetime21);
+                                        $interval1O = $datetime11->diff($datetime21);
                                         //$elapsed = $interval->format('%y years %m months %a days %h hours %i minutes %s seconds');
-                                        $hours1 = $interval1->format('%h');
-                                        $minutes1 = $interval1->format('%i');
-                                        $late_min2 += ($hours1 * 60 + $minutes1);
+                                        $hours1o = $interval1O->format('%h');
+                                        $minutes1o = $interval1O->format('%i');
+                                        $late_min2 += ($hours1o * 60 + $minutes1o);
 
                                         $gatepass = new TempGatePass();
                                         $gatepass->employee_id = $employee->EmployeeId;
@@ -463,7 +515,7 @@ class PayrollController extends Controller
 
                             }
 
-                            $absent = $total_working_days - $emp_present_days;
+                            $absent = count($abs_arr);//$total_working_days - $emp_present_days; 25-03-2019 Change;
                         }
                     }
                     /*********************Late Min/Count Calculation***************************/
@@ -607,7 +659,7 @@ class PayrollController extends Controller
                     $payrole_model->holidays = count($holidays);
                     $payrole_model->weekend_days = $weekend;
                     $payrole_model->working_days = $total_working_days;
-                    $payrole_model->present_days = $emp_present_days; //$present_days->present_days;
+                    $payrole_model->present_days = $total_working_days - $absent;//$emp_present_days; //$present_days->present_days;
                     $payrole_model->absent_days = $absent;
                     $payrole_model->late_minute = $late_min;
                     $payrole_model->previous_gatepassmin = $employee_leave_left->gate_pass_min;
@@ -620,11 +672,11 @@ class PayrollController extends Controller
                     $payrole_model->lwp = $lwp;
                     $payrole_model->paid_leave = $paid_leave;
                     $payrole_model->salary = $employee->salary;
-                    $payrole_model->gross_salary = $grosssal;
-                    $payrole_model->total_pf = $total_pf;
-                    $payrole_model->total_esic = $total_esic;
-                    $payrole_model->total_deduction = $total_deduction;
-                    $payrole_model->payout = number_format((float)$payout, 2, '.', '');
+                    $payrole_model->gross_salary = ($present_days->present_days > 0) ? $grosssal : 0;
+                    $payrole_model->total_pf = ($present_days->present_days > 0) ? $total_pf : 0;
+                    $payrole_model->total_esic = ($present_days->present_days > 0) ? $total_esic : 0;
+                    $payrole_model->total_deduction = ($present_days->present_days > 0) ? $total_deduction : 0;
+                    $payrole_model->payout = ($present_days->present_days > 0) ? number_format((float)$payout, 2, '.', '') : 0;
                     $payrole_model->date = $month . ',' . $year;
                     $payrole_model->session_id = $session_master->id;
                     $payrole_model->created_time = Carbon::now('Asia/Kolkata');
@@ -640,339 +692,6 @@ class PayrollController extends Controller
         }
     }
 
-    public function generate_payrole_running(Request $request)
-    {
-        $employee_id = $request->input('employee_id');
-
-        $year = $request->input('year');
-        $month = $request->input('month');
-        $pdate_check = $month . "," . $year;
-
-//        return $employee_id;
-        if ($employee_id != '') {
-            $month_days = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-
-            $employee_list = $employee_id[0] == 0 ? EmployeeModel::where(['is_active' => 1])->get() : EmployeeModel::where(['is_active' => 1])->whereIn('EmployeeId', $employee_id)->get();
-
-            for ($i = 1; $i <= 1; $i++)
-                $all_date_arr[] = $year . '-' . (($month < 10) ? '0' . $month : $month) . '-' . (($i < 10) ? '0' . $i : $i);
-
-//            $holidays = DB::select("SELECT * FROM `holiday` WHERE date BETWEEN '$year-$month-01' and '$year-$month-31'");//2;
-
-            $weekend = $this->sunday_ina_month($month, $year);
-            $session_master = SessionMaster::where(['is_active' => 1])->first();
-
-            foreach ($employee_list as $employee) {
-                $parole_check = TempPayrole::where(['date' => $pdate_check, 'employee_id' => $employee->EmployeeId])->first();
-                if (!isset($parole_check)) {
-
-                    $holidays = DB::select("SELECT * FROM `holiday` WHERE date BETWEEN '$year-$month-01' and '$year-$month-31' and FIND_IN_SET('$employee->EmployeeId',employee_id) and is_active = 1");//2;
-                    $total_working_days = $month_days - count($holidays) - $weekend;
-
-                    $late_min = 0;
-                    $late_min1 = 0;
-                    $late_min2 = 0;
-                    $overtime_min = 0;
-                    $gtm = 0;
-                    $gatepassmin = 0;
-                    $absent = 0;
-                    $emp_present_days = 0;
-                    $late_count = 0;
-                    $UserId = $employee->emp_code;
-                    $lwp = 0;
-                    $paid_leave = 0;
-                    $total_pf = 0;
-                    $total_esic = 0;
-                    $total_gatepass = 0;
-                    $total_deduction = 0;
-
-                    $grosssal = 0;
-                    $payout = 0;
-                    $emp_cat_row = EmployeeType::where(['id' => $employee->type_id])->first();
-
-                    $employee_leave_left = EmployeeLeaveLeft::where(['employee_id' => $employee->EmployeeId, 'session_id' => $session_master->id])->first();
-
-                    $given_max_cl = isset($emp_cat_row->cl) ? $emp_cat_row->cl : 12;
-
-                    $given_max_ml = isset($emp_cat_row->ml) ? $emp_cat_row->ml : 7;
-
-
-                    $taken_cl = $given_max_cl - isset($employee_leave_left) ? $employee_leave_left->cl : 0;
-                    $taken_ml = $given_max_ml - isset($employee_leave_left) ? $employee_leave_left->ml : 0;
-
-                    $left_max_cl = $given_max_cl - $taken_cl;
-                    $left_max_ml = $given_max_ml - $taken_ml;
-
-                    $present_days = DB::selectOne("SELECT COUNT(AttendanceLogId) as present_days FROM `attendancelogs` WHERE StatusCode = 'P' and EmployeeId = $employee->EmployeeId and MONTH(AttendanceDate) = $month AND YEAR(AttendanceDate) = $year");
-                    $attendance_records = DB::select("SELECT * FROM `attendancelogs` WHERE StatusCode = 'P' and EmployeeId = $employee->EmployeeId and MONTH(AttendanceDate) = $month AND YEAR(AttendanceDate) = $year");
-
-
-                    /*********************Late Min/Count Calculation***************************/
-                    if ($present_days->present_days > 0) {
-                        //echo  $sql=$this->db->last_query(); die;
-
-
-//                        $absent = $total_working_days - $present_days->present_days;
-
-                        if (count($attendance_records) > 0) {
-                            $PFESIC = PFESIC::find(1);
-                            foreach ($attendance_records as $value) {
-                                $employee_arr1 = array();
-                                $att_date = date_format(date_create($value->AttendanceDate), "Y-m-d");
-                                /*holiday Overtime if present*/
-                                $holiday_present_check = DB::selectOne("SELECT * FROM `holiday` WHERE date = '$att_date' and FIND_IN_SET('$employee->EmployeeId',employee_id) and is_active = 1");//2;
-                                /*holiday Overtime if present*/
-                                $cintime = $att_date . ' ' . $employee->check_in;
-                                $couttime = $att_date . ' ' . $employee->check_out;
-                                if (!isset($holiday_present_check)) {
-                                    $emp_present_days += 1;
-                                    if ($value->InTime > $cintime) {
-                                        $datetime1 = new DateTime($cintime);
-                                        $datetime2 = new DateTime($value->InTime);
-                                        $interval = $datetime1->diff($datetime2);
-                                        //$elapsed = $interval->format('%y years %m months %a days %h hours %i minutes %s seconds');
-                                        $hours = $interval->format('%h');
-                                        $minutes = $interval->format('%i');
-                                        $lmt = ($hours * 60 + $minutes);
-                                        if ($lmt > $PFESIC->gate_pass_min) {
-                                            $gatepass = new TempGatePass();
-                                            $gatepass->employee_id = $employee->EmployeeId;
-                                            $gatepass->late_min = $lmt;
-                                            $gatepass->date = date_format(date_create($value->AttendanceDate), "Y-m-d");
-                                            $gatepass->session_id = $session_master->id;
-                                            $gatepass->save();
-                                            $gtm += $lmt;
-                                        } else {
-                                            $late_min1 += $lmt;
-                                        }
-                                        $late_count++;
-                                    }
-                                    if ($value->OutTime < $couttime) {
-                                        $datetime11 = new DateTime($couttime);
-                                        $datetime21 = new DateTime($value->OutTime);
-                                        $interval1 = $datetime11->diff($datetime21);
-                                        //$elapsed = $interval->format('%y years %m months %a days %h hours %i minutes %s seconds');
-                                        $hours1 = $interval1->format('%h');
-                                        $minutes1 = $interval1->format('%i');
-                                        $late_min2 += ($hours1 * 60 + $minutes1);
-
-                                        $gatepass = new TempGatePass();
-                                        $gatepass->employee_id = $employee->EmployeeId;
-                                        $gatepass->late_min = $late_min2;
-                                        $gatepass->date = date_format(date_create($value->AttendanceDate), "Y-m-d");
-                                        $gatepass->session_id = $session_master->id;
-                                        $gatepass->save();
-                                        $gtm += $late_min2;
-
-                                    } else {
-                                        $datetime11 = new DateTime($value->OutTime);
-                                        $datetime21 = new DateTime($couttime);
-                                        $interval1 = $datetime11->diff($datetime21);
-                                        //$elapsed = $interval->format('%y years %m months %a days %h hours %i minutes %s seconds');
-                                        $hours1 = $interval1->format('%h');
-                                        $minutes1 = $interval1->format('%i');
-                                        $overtime_min += ($hours1 * 60 + $minutes1);
-
-                                        $overtime = new TempOvertime();
-                                        $overtime->employee_id = $employee->EmployeeId;
-                                        $overtime->overtime_min = $overtime_min;
-                                        $overtime->date = date_format(date_create($value->AttendanceDate), "Y-m-d");
-                                        $overtime->session_id = $session_master->id;
-                                        $overtime->save();
-                                    }
-                                    $late_min = $late_min1 + $late_min2;
-//                                    $gatepassmin += $gtm;
-//                        $pdate_arr[] = $value->AttendanceDate;
-                                } else {
-                                    $datetime11 = new DateTime($cintime);
-                                    $datetime21 = new DateTime($couttime);
-                                    $interval1 = $datetime11->diff($datetime21);
-                                    //$elapsed = $interval->format('%y years %m months %a days %h hours %i minutes %s seconds');
-                                    $hours1 = $interval1->format('%h');
-                                    $minutes1 = $interval1->format('%i');
-                                    $overtime_min += ($hours1 * 60 + $minutes1);
-
-                                    $overtime = new TempOvertime();
-                                    $overtime->employee_id = $employee->EmployeeId;
-                                    $overtime->overtime_min = $overtime_min;
-                                    $overtime->date = date_format(date_create($value->AttendanceDate), "Y-m-d");
-                                    $overtime->session_id = $session_master->id;
-                                    $overtime->save();
-                                }
-
-                            }
-
-                            $absent = $total_working_days - $emp_present_days;
-                        }
-                    }
-                    /*********************Late Min/Count Calculation***************************/
-
-
-                    /*********************Lwp(Leave Without Pay) Calculation***************************/
-                    $oneday_sal = $employee->salary / $month_days;  ///Salary Per Day
-                    if ($late_count > 2) {
-                        if ($late_count == 3)
-                            $lwp = $lwp + 1;
-                        else
-                            $lwp = $lwp + intval($late_count / 2);
-
-                    }
-                    /*********************Lwp(Leave Without Pay) Calculation***************************/
-
-
-                    /*********************May June Expect Month Calculation***************************/
-                    if ($month != 5 && $month != 6) {
-                        if (($left_max_cl > 0 || $left_max_ml > 0) && $lwp > 0) {
-
-                            $data_leave['date'] = $month . ',' . $year;
-
-
-//                    $leave_obj = $this->db->get_where('leave', array('date' => $data_leave['date'], 'emp_id' => $employee->id, 'session_id' => $session_master->session))->row();
-
-                            $leave_obj = EmployeeLeaves::where(['date' => $data_leave['date'], 'employee_id' => $employee->id, 'session_id' => $session_master->id])->get();
-                            //$query= $payroll ;
-
-                            if (count($leave_obj) > 0) {
-
-                                $leave_model = new TempEmployeeLeaves();
-                                $leave_model->date = $month . ',' . $year;
-                                $leave_model->employee_id = $employee->id;
-                                $leave_model->session_id = $session_master->id;
-                                $leave_model->leave_type = 'CL';
-                                $leave_model->save();
-//                            if (isset($employee_leave_left)) {
-//                                $employee_leave_left->cl -= 1;
-//                                $employee_leave_left->save();
-//                            }
-//                        $this->db->insert('leave', $data_leave);
-                                $paid_leave++;
-                                $lwp--;
-                                $left_max_cl--;
-                                if ($left_max_cl > 0 && $lwp > 0) {
-                                    $leave_model = new TempEmployeeLeaves();
-                                    $leave_model->date = $month . ',' . $year;
-                                    $leave_model->employee_id = $employee->id;
-                                    $leave_model->session_id = $session_master->id;
-                                    $leave_model->leave_type = 'CL';
-                                    $leave_model->save();
-//                                if (isset($employee_leave_left)) {
-//                                    $employee_leave_left->cl -= 1;
-//                                    $employee_leave_left->save();
-//                                }
-                                    $paid_leave++;
-                                    $lwp--;
-                                    $left_max_cl--;
-                                    if ($left_max_ml > 0 && $lwp > 0) {
-                                        $leave_model = new TempEmployeeLeaves();
-                                        $leave_model->date = $month . ',' . $year;
-                                        $leave_model->employee_id = $employee->id;
-                                        $leave_model->session_id = $session_master->id;
-                                        $leave_model->leave_type = 'ML';
-                                        $leave_model->save();
-//                                    if (isset($employee_leave_left)) {
-//                                        $employee_leave_left->ml -= 1;
-//                                        $employee_leave_left->save();
-//                                    }
-                                        $paid_leave++;
-                                        $lwp--;
-                                        $left_max_ml--;
-                                    }
-                                    if ($left_max_ml > 0 && $lwp > 0) {
-                                        $leave_model = new TempEmployeeLeaves();
-                                        $leave_model->date = $month . ',' . $year;
-                                        $leave_model->employee_id = $employee->id;
-                                        $leave_model->session_id = $session_master->id;
-                                        $leave_model->leave_type = 'ML';
-                                        $leave_model->save();
-//                                    if (isset($employee_leave_left)) {
-//                                        $employee_leave_left->ml -= 1;
-//                                        $employee_leave_left->save();
-//                                    }
-
-                                        $paid_leave++;
-                                        $lwp--;
-                                        $left_max_ml--;
-                                    }
-
-                                }
-                            }
-
-                        }
-                    }
-                    /*********************May June Expect Month Calculation***************************/
-
-                    /*********************Gross Salary Deduction Calculation***************************/
-//                    dd($gtm);
-                    $fullday = 0;
-                    $halfday = 0;
-                    $minCal = $employee_leave_left->gate_pass_min + $gtm;
-                    while ($minCal > 179) {
-                        if ($minCal > 360) {
-                            $minCal = $minCal - 360;
-                            $fullday++;
-                        } elseif ($minCal > 180) {
-                            $minCal = $minCal - 180;
-                            $halfday++;
-                        }
-                    }
-                    $gtDays = $fullday + ($halfday / 2);
-                    $total_gatepass += $oneday_sal * $gtDays;
-                    $total_deduction = $oneday_sal * ($lwp + $absent);
-                    $total_deduction = round($total_deduction, 2);
-
-
-                    $grosssal += $employee->salary - $total_gatepass - $total_deduction;
-
-                    if ($employee->is_pf_applied == 1) {
-                        $pf_esic = PFESIC::find(1);
-                        $total_pf = ($grosssal * $pf_esic->pf) / 100;
-                        $total_pf = round($total_pf, 2);
-                        if ($total_pf > 2040)
-                            $total_pf = 2040;
-                        $total_esic = (($grosssal - $total_pf) * $pf_esic->esic) / 100;
-                        $total_esic = round($total_esic, 2);
-                    }
-
-                    $total_deduction = $total_pf + $total_esic + $total_gatepass + $oneday_sal * ($lwp + $absent);
-                    $payout = $employee->salary - $total_deduction;
-                    /*********************Gross Salary Deduction Calculation***************************/
-
-                    $payrole_model = new TempPayrole();
-                    $payrole_model->employee_id = $employee->EmployeeId;
-                    $payrole_model->month_days = $month_days;
-                    $payrole_model->holidays = count($holidays);
-                    $payrole_model->weekend_days = $weekend;
-                    $payrole_model->working_days = $total_working_days;
-                    $payrole_model->present_days = $emp_present_days; //$present_days->present_days;
-                    $payrole_model->absent_days = $absent;
-                    $payrole_model->late_minute = $late_min;
-                    $payrole_model->previous_gatepassmin = $employee_leave_left->gate_pass_min;
-                    $payrole_model->gatepassmin = $gtm;
-                    $payrole_model->gt_full_day = $fullday;
-                    $payrole_model->gt_half_day = $halfday;
-                    $payrole_model->overtime_min = $overtime_min;
-                    $payrole_model->total_gatepass = $total_gatepass;
-                    $payrole_model->late_count = $late_count;
-                    $payrole_model->lwp = $lwp;
-                    $payrole_model->paid_leave = $paid_leave;
-                    $payrole_model->salary = $employee->salary;
-                    $payrole_model->gross_salary = $grosssal;
-                    $payrole_model->total_pf = $total_pf;
-                    $payrole_model->total_esic = $total_esic;
-                    $payrole_model->total_deduction = $total_deduction;
-                    $payrole_model->payout = number_format((float)$payout, 2, '.', '');
-                    $payrole_model->date = $month . ',' . $year;
-                    $payrole_model->session_id = $session_master->id;
-                    $payrole_model->created_time = Carbon::now('Asia/Kolkata');
-                    $payrole_model->save();
-
-                }
-            }
-            return redirect('create-payroll')->with('message', 'Temporary Payroll has been generated');
-        } else {
-            return Redirect::back()->with('errmessage', 'Please select any employee');
-        }
-    }
 
     public function convert_payroll(Request $request, $payroll_date)
     {
@@ -1094,6 +813,17 @@ class PayrollController extends Controller
         DB::select("DELETE FROM `temp_overtime` WHERE MONTH(date) = $arrayDate[0] AND YEAR(date) = $arrayDate[1]");
         TempPayrole::where(['date' => request('date')])->delete();
         return redirect('create-payroll')->with('message', 'Temporary Payroll has been deleted');
+    }
+    public function delete_temp_payroll()
+    {
+        $temp_prl = TempPayrole::find(request('pid'));
+        $arrayDate = explode(",", $temp_prl->date);
+        DB::select("DELETE FROM `temp_gate_pass` WHERE MONTH(date) = $arrayDate[0] AND YEAR(date) = $arrayDate[1] and employee_id = $temp_prl->employee_id");
+        DB::select("DELETE FROM `temp_leave` WHERE MONTH(date) = $arrayDate[0] AND YEAR(date) = $arrayDate[1] and employee_id = $temp_prl->employee_id");
+        DB::select("DELETE FROM `temp_overtime` WHERE MONTH(date) = $arrayDate[0] AND YEAR(date) = $arrayDate[1] and employee_id = $temp_prl->employee_id");
+        $temp_prl->delete();
+//        TempPayrole::where(['date' => request('date')])->delete();
+//        return redirect('create-payroll')->with('message', 'Temporary Payroll has been deleted');
     }
 
 }

@@ -64,6 +64,7 @@ Route::group(['middleware' => 'usersession'], function () {
     Route::get('create-payroll','PayrollController@create_payrole');
     Route::get('generate_payroll','PayrollController@generate_payrole');
     Route::get('delete_payroll_temp','PayrollController@delete_payroll_temp');
+    Route::get('delete_temp_payroll','PayrollController@delete_temp_payroll');
     Route::get('view-payroll/{date}','PayrollController@payrole_list');
     Route::get('view-temp-payroll/{date}','PayrollController@temp_payrole_list');
 

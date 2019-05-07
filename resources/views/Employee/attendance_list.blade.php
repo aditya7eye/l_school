@@ -204,7 +204,7 @@
                                                     @endif
                                                 @endif
                                             @else
-                                                @if(in_array("$att_date", $result))
+                                                @if(!in_array("$att_date", $result))
                                                     @if($attendanc->InTime != '1900-01-01 00:00:00')
                                                         <span class="badge badge-primary">{{"Holiday"}}
                                                             ({{date_format(date_create($attendanc->InTime), "d-M-Y h:i A")}}
@@ -241,7 +241,7 @@
                                                     @endif
                                                 @endif
                                             @else
-                                                @if(in_array("$att_date", $result))
+                                                @if(!in_array("$att_date", $result))
                                                     @if($attendanc->OutTime != '1900-01-01 00:00:00')
                                                         <span class="badge badge-primary">{{"Holiday"}}
                                                             ({{date_format(date_create($attendanc->OutTime), "d-M-Y h:i A")}}
