@@ -64,7 +64,7 @@ $(document).ready(function () {
         } else {
             $(this).removeClass('errorClass');
         }
-    })
+    });
 });
 
 function btnChange(dis) {

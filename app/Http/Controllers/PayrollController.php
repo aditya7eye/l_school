@@ -183,6 +183,18 @@ class PayrollController extends Controller
                 if (!isset($parole_check)) {
 
                     $holidays = DB::select("SELECT * FROM `holiday` WHERE date BETWEEN '$year-$month-01' and '$year-$month-31' and FIND_IN_SET('$employee->EmployeeId',employee_id) and is_active = 1");//2;
+
+                    $attendance_count = DB::select("SELECT * FROM `attendancelogs` WHERE EmployeeId = $employee->EmployeeId and MONTH(AttendanceDate) = $month AND YEAR(AttendanceDate) = $year");
+                    if (count($attendance_count) < 30) {
+                        $month_weekend_sunday = 0;
+                        foreach ($attendance_count as $item) {
+                            $dt = Carbon::parse($item->AttendanceDate)->format('l');
+                            if ($dt == "Sunday") {
+                                $month_weekend_sunday += 1;
+                            }
+                        }
+                        $weekend = $month_weekend_sunday;
+                    }
                     $total_working_days = $month_days - count($holidays) - $weekend;
 
                     $late_min = 0;
@@ -514,8 +526,14 @@ class PayrollController extends Controller
                                 }
 
                             }
-
-                            $absent = count($abs_arr);//$total_working_days - $emp_present_days; 25-03-2019 Change;
+                            //change in 14th June 19//$absent = count($abs_arr);//$total_working_days - $emp_present_days; 25-03-2019 Change;
+                            $absent_count = count($abs_arr);//$total_working_days - $emp_present_days; 25-03-2019 Change;
+                            $absent_all = $total_working_days - $emp_present_days; //count($abs_arr);//$total_working_days - $emp_present_days; 25-03-2019 Change;
+                            if ($absent_count >= $absent_all) {
+                                $absent = $absent_count;
+                            } else {
+                                $absent = $absent_all;
+                            }
                         }
                     }
                     /*********************Late Min/Count Calculation***************************/
@@ -814,6 +832,7 @@ class PayrollController extends Controller
         TempPayrole::where(['date' => request('date')])->delete();
         return redirect('create-payroll')->with('message', 'Temporary Payroll has been deleted');
     }
+
     public function delete_temp_payroll()
     {
         $temp_prl = TempPayrole::find(request('pid'));
